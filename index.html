@@ -39,7 +39,10 @@
     overflow-y: auto;
     position: relative;
     z-index: 1;
+    /* 右端に常駐するスクロールバーがfixedの枠線との間隔を潰すため非表示に */
+    scrollbar-width: none;
   }
+  #scroller::-webkit-scrollbar { display: none; }
   .jp {
     font-family: "Noto Sans JP", sans-serif;
     font-weight: 500;
@@ -168,7 +171,9 @@
     font-size: 12px;
     font-weight: 300;
     margin: 0;
+    transition: opacity 0.4s ease;
   }
+  .scroll-cue.is-hidden { opacity: 0; }
 
   /* ── Scroll content ──────────────────────── */
   .content {
@@ -237,7 +242,12 @@
     background: transparent;
     color: var(--ink);
   }
-  .contact-btn svg { margin-right: 10px; display: block; }
+  .contact-btn svg {
+    margin-right: 10px;
+    display: block;
+    transition: transform 0.15s ease;
+  }
+  .contact-btn:hover svg { transform: translateX(12px); }
 
   /* ── Footer ──────────────────────────────── */
   footer {
@@ -481,6 +491,13 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+
+  // SCROLLの表示: スクロールした瞬間ふわっと消え、先頭に戻ると再表示
+  const scroller = document.getElementById("scroller");
+  const scrollCue = document.querySelector(".scroll-cue");
+  scroller.addEventListener("scroll", () => {
+    scrollCue.classList.toggle("is-hidden", scroller.scrollTop > 10);
+  }, { passive: true });
 })();
 </script>
 
