@@ -24,11 +24,21 @@
   }
   html, body {
     margin: 0;
+    height: 100%;
     background: #fff;
+    /* bodyを直接スクロールさせると、Chromiumのfixed+mix-blend-mode合成バグで
+       画面全体が白く固着することがあるため、スクロールは#scrollerに委譲する */
+    overflow: hidden;
   }
   body {
     font-family: "42dot Sans", "Noto Sans JP", sans-serif;
     color: var(--ink);
+  }
+  #scroller {
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1;
   }
   .jp {
     font-family: "Noto Sans JP", sans-serif;
@@ -62,8 +72,6 @@
     width: 100%;
     max-width: 1280px;
     margin: 0 auto;
-    position: relative;
-    z-index: 1;
   }
 
   /* ── Fixed viewport frame ────────────────── */
@@ -240,6 +248,7 @@
 
 <div id="tint"></div>
 
+<div id="scroller">
 <div class="page">
 
   <section class="first-view"></section>
@@ -291,6 +300,8 @@
 
   </div>
 
+</div><!-- /.page -->
+
   <footer>
     <svg class="wordmark" viewBox="0 0 657.664 231.35" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="octo">
       <path d="M576.464 231.35C550.33 231.35 530.264 223.533 516.264 207.9C502.264 192.033 495.264 169.4 495.264 140C495.264 110.6 502.264 88.0833 516.264 72.45C530.264 56.8167 550.33 49 576.464 49C593.964 49 608.664 52.5 620.564 59.5C632.697 66.5 641.914 76.7667 648.214 90.3C654.514 103.833 657.664 120.4 657.664 140C657.664 169.4 650.664 192.033 636.664 207.9C622.664 223.533 602.597 231.35 576.464 231.35ZM576.464 213.5C596.064 213.5 611.114 207.2 621.614 194.6C632.347 182 637.714 163.8 637.714 140C637.714 116.2 632.347 98.1167 621.614 85.75C611.114 73.15 596.064 66.85 576.464 66.85C556.864 66.85 541.697 73.15 530.964 85.75C520.464 98.1167 515.214 116.2 515.214 140C515.214 163.8 520.464 182 530.964 194.6C541.697 207.2 556.864 213.5 576.464 213.5Z" fill="currentColor"/>
@@ -306,7 +317,7 @@
     </div>
   </footer>
 
-</div>
+</div><!-- /#scroller -->
 
 <script>
 (() => {
