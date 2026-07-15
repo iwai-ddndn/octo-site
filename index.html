@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>octo — design studio</title>
+<meta name="description" content="octoは、マルチな領域で活動するデザインスタジオです。Web Design / UI/UX Design / Graphic Design / AI Creative" />
+<meta property="og:title" content="octo — design studio" />
+<meta property="og:description" content="octoは、マルチな領域で活動するデザインスタジオです。" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://oc-to.com/" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3Cpath fill='%232962FF' d='M549 412L291 387L348 248ZM411 486L262 349L376 287ZM230 512L247 284L392 351ZM161 399L291 262L348 373ZM108 227L348 251L291 384ZM229 157L378 284L261 351ZM395 130L391 346L247 289ZM472 238L347 371L291 264Z'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=42dot+Sans:wght@400;500;600&family=Noto+Sans+JP:wght@500&display=swap" rel="stylesheet" />
+<style>
+  /*
+   * 白抜き合成のため、DOM上はすべて「黒 + 白」で組む。
+   * 最前面の #tint (#2962FF, lighten) が黒→ブルーに置き換える。
+   * #logo は白 + difference で、黒(=ブルー)との重なりが白抜きになる。
+   */
+  :root {
+    --ink: #000;
+  }
+  html, body {
+    margin: 0;
+    background: #fff;
+  }
+  body {
+    font-family: "42dot Sans", "Noto Sans JP", sans-serif;
+    color: var(--ink);
+  }
+  .jp {
+    font-family: "Noto Sans JP", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 28px;
+  }
+
+  /* ── 合成レイヤー ─────────────────────────── */
+  #logo {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(640px, 88vmin);
+    height: auto;
+    mix-blend-mode: difference;
+    pointer-events: none;
+    z-index: 10;
+  }
+  #tint {
+    position: fixed;
+    inset: 0;
+    background: #2962ff;
+    mix-blend-mode: lighten;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Fixed viewport frame ────────────────── */
+  /* 罫線・コーナーマークは星と同じ「白 + difference」:
+     白背景では青、フッター(青)上では白に自動反転する */
+  #frame {
+    position: fixed;
+    inset: 0;
+    mix-blend-mode: difference;
+    pointer-events: none;
+    z-index: 11;
+  }
+  #frame .border-line {
+    position: absolute;
+    inset: 20px;
+    border: 1px solid #fff;
+  }
+  .corner {
+    position: absolute;
+    width: 18px;
+    height: 20px;
+  }
+  .corner::before, .corner::after {
+    content: "";
+    position: absolute;
+    background: #fff;
+  }
+  .corner::before { width: 4px; height: 20px; }
+  .corner::after  { width: 18px; height: 4px; }
+  .corner.tl { left: 16px; top: 16px; }
+  .corner.tr { right: 16px; top: 16px; }
+  .corner.bl { left: 16px; bottom: 16px; }
+  .corner.br { right: 16px; bottom: 16px; }
+  .corner.tr::before { right: 0; }
+  .corner.br::before { right: 0; bottom: 0; }
+  .corner.bl::before { bottom: 0; }
+  .corner.tl::before { left: 0; }
+  .corner.tl::after, .corner.tr::after { top: 0; }
+  .corner.bl::after, .corner.br::after { bottom: 0; }
+
+  /* 白地チップは反転させない通常レイヤー */
+  #chips {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 15;
+  }
+  #chips a { pointer-events: auto; }
+  .chip {
+    background: #fff;
+    padding: 0 8px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .edge-label-left, .edge-label-right {
+    position: absolute;
+    top: 50%;
+  }
+  .edge-label-left  { left: 20.5px; transform: translate(-50%, -50%) rotate(-90deg); }
+  .edge-label-right { right: 19.5px; transform: translate(50%, -50%) rotate(90deg); }
+  .contact-chip {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    transform: translate(-50%, 50%);
+  }
+  .contact-chip svg { display: block; }
+
+  /* ── First view (スペーサー) ─────────────── */
+  .first-view {
+    position: relative;
+    height: 100svh;
+    min-height: 640px;
+  }
+
+  /* ── Scroll content ──────────────────────── */
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 120px;
+    padding-top: 120px;
+  }
+  .wordmark {
+    width: 657.664px;
+    max-width: calc(100% - 40px);
+    height: auto;
+    display: block;
+    color: var(--ink);
+  }
+  /* 420pxを基準に、それ以下の画面幅ではそのまま縮む（左右20pxはpaddingで確保） */
+  .col {
+    width: min(420px, 100%);
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+  }
+  .work {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .work h2 {
+    font-size: 40px;
+    font-weight: 500;
+    line-height: normal;
+    margin: 0;
+  }
+  .work .placeholder {
+    height: 400px;
+    border: 1px solid var(--ink);
+  }
+  .work p { margin: 0; }
+
+  /* ── Footer ──────────────────────────────── */
+  footer {
+    background: var(--ink);
+    min-height: 100svh;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+    padding: 40px;
+    box-sizing: border-box;
+    margin-top: 120px;
+  }
+  footer .wordmark { color: #fff; }
+  footer .credit {
+    color: #fff;
+    font-size: 14px;
+    line-height: 28px;
+    padding-top: 40px;
+    white-space: nowrap;
+  }
+  footer .credit p { margin: 0; }
+</style>
+</head>
+<body>
+
+<svg id="logo" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+  <path id="burst" fill="#fff" />
+</svg>
+
+<div id="frame">
+  <div class="border-line"></div>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+</div>
+
+<div id="chips">
+  <span class="chip edge-label-left">octo</span>
+  <span class="chip edge-label-right">octo</span>
+  <a class="chip contact-chip" href="mailto:info@oc-to.com">
+    contact
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.5 9.5H2.5V2.5H6V1.5H2.5C1.945 1.5 1.5 1.95 1.5 2.5V9.5C1.5 10.05 1.945 10.5 2.5 10.5H9.5C10.05 10.5 10.5 10.05 10.5 9.5V6H9.5V9.5ZM7 1.5V2.5H8.795L3.88 7.415L4.585 8.12L9.5 3.205V5H10.5V1.5H7Z" fill="currentColor"/>
+    </svg>
+  </a>
+</div>
+
+<div id="tint"></div>
+
+<div class="page">
+
+  <section class="first-view"></section>
+
+  <div class="content">
+
+    <svg class="wordmark" viewBox="0 0 657.664 231.35" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="octo">
+      <path d="M576.464 231.35C550.33 231.35 530.264 223.533 516.264 207.9C502.264 192.033 495.264 169.4 495.264 140C495.264 110.6 502.264 88.0833 516.264 72.45C530.264 56.8167 550.33 49 576.464 49C593.964 49 608.664 52.5 620.564 59.5C632.697 66.5 641.914 76.7667 648.214 90.3C654.514 103.833 657.664 120.4 657.664 140C657.664 169.4 650.664 192.033 636.664 207.9C622.664 223.533 602.597 231.35 576.464 231.35ZM576.464 213.5C596.064 213.5 611.114 207.2 621.614 194.6C632.347 182 637.714 163.8 637.714 140C637.714 116.2 632.347 98.1167 621.614 85.75C611.114 73.15 596.064 66.85 576.464 66.85C556.864 66.85 541.697 73.15 530.964 85.75C520.464 98.1167 515.214 116.2 515.214 140C515.214 163.8 520.464 182 530.964 194.6C541.697 207.2 556.864 213.5 576.464 213.5Z" fill="currentColor"/>
+      <path d="M469.221 70H425.822V210.35H467.471V227.85H445.072C430.838 227.85 420.688 225.517 414.621 220.85C408.788 216.183 405.871 206.733 405.871 192.5V70H374.721V52.5H405.871V0H425.822V52.5H469.221V70Z" fill="currentColor"/>
+      <path d="M280.142 231.35C252.609 231.35 232.076 223.533 218.542 207.9C205.009 192.033 198.242 169.4 198.242 140C198.242 110.6 205.242 88.0833 219.242 72.45C233.242 56.8167 253.309 49 279.442 49C292.509 49 303.826 51.1 313.392 55.3C323.192 59.5 331.126 65.45 337.192 73.15C343.259 80.85 347.342 90.0667 349.442 100.8H328.442C326.109 90.5333 321.326 82.3667 314.092 76.3C307.092 70 295.659 66.85 279.792 66.85C259.959 66.85 244.676 73.15 233.942 85.75C223.442 98.1167 218.192 116.2 218.192 140C218.192 163.8 223.442 182 233.942 194.6C244.676 207.2 259.959 213.5 279.792 213.5C294.959 213.5 306.275 211.05 313.742 206.15C321.209 201.017 326.109 192.85 328.442 181.65H349.792C347.926 191.45 344.076 200.083 338.242 207.55C332.642 215.017 324.942 220.85 315.142 225.05C305.576 229.25 293.909 231.35 280.142 231.35Z" fill="currentColor"/>
+      <path d="M81.2 231.35C55.0667 231.35 35 223.533 21 207.9C7 192.033 0 169.4 0 140C0 110.6 7 88.0833 21 72.45C35 56.8167 55.0667 49 81.2 49C98.7 49 113.4 52.5 125.3 59.5C137.433 66.5 146.65 76.7667 152.95 90.3C159.25 103.833 162.4 120.4 162.4 140C162.4 169.4 155.4 192.033 141.4 207.9C127.4 223.533 107.333 231.35 81.2 231.35ZM81.2 213.5C100.8 213.5 115.85 207.2 126.35 194.6C137.083 182 142.45 163.8 142.45 140C142.45 116.2 137.083 98.1167 126.35 85.75C115.85 73.15 100.8 66.85 81.2 66.85C61.6 66.85 46.4333 73.15 35.7 85.75C25.2 98.1167 19.95 116.2 19.95 140C19.95 163.8 25.2 182 35.7 194.6C46.4333 207.2 61.6 213.5 81.2 213.5Z" fill="currentColor"/>
+    </svg>
+
+    <div class="col">
+      <p class="jp" style="margin:0">octoは、マルチな領域で活動するデザインスタジオです。</p>
+
+      <div class="work">
+        <h2>Web Design</h2>
+        <div class="placeholder"></div>
+        <p class="jp">あああああ</p>
+      </div>
+
+      <div class="work">
+        <h2>UI/UX Design</h2>
+        <div class="placeholder"></div>
+        <p class="jp">複雑で曖昧な領域を画面デザインまで落とし込みます。ビジョンやシナリオから、画面デザインとデザインガイドラインまで。0→1の開発も、既存プロダクトの改善も。2B領域が専門ですが、2C領域も受け入れていますのでご相談ください。</p>
+      </div>
+
+      <div class="work">
+        <h2>Graphic Design</h2>
+        <div class="placeholder"></div>
+        <p class="jp">ああああ</p>
+      </div>
+
+      <div class="work">
+        <h2>AI Creative</h2>
+        <div class="placeholder"></div>
+        <p class="jp">ああああ</p>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="work">
+        <div class="placeholder"></div>
+        <h2>Soichiro Iwai</h2>
+        <p class="jp">千葉大学デザイン学科卒業。新卒で制作会社に入社、富士通デザインを経て2023年にフリーランスとして独立。</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <svg class="wordmark" viewBox="0 0 657.664 231.35" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="octo">
+      <path d="M576.464 231.35C550.33 231.35 530.264 223.533 516.264 207.9C502.264 192.033 495.264 169.4 495.264 140C495.264 110.6 502.264 88.0833 516.264 72.45C530.264 56.8167 550.33 49 576.464 49C593.964 49 608.664 52.5 620.564 59.5C632.697 66.5 641.914 76.7667 648.214 90.3C654.514 103.833 657.664 120.4 657.664 140C657.664 169.4 650.664 192.033 636.664 207.9C622.664 223.533 602.597 231.35 576.464 231.35ZM576.464 213.5C596.064 213.5 611.114 207.2 621.614 194.6C632.347 182 637.714 163.8 637.714 140C637.714 116.2 632.347 98.1167 621.614 85.75C611.114 73.15 596.064 66.85 576.464 66.85C556.864 66.85 541.697 73.15 530.964 85.75C520.464 98.1167 515.214 116.2 515.214 140C515.214 163.8 520.464 182 530.964 194.6C541.697 207.2 556.864 213.5 576.464 213.5Z" fill="currentColor"/>
+      <path d="M469.221 70H425.822V210.35H467.471V227.85H445.072C430.838 227.85 420.688 225.517 414.621 220.85C408.788 216.183 405.871 206.733 405.871 192.5V70H374.721V52.5H405.871V0H425.822V52.5H469.221V70Z" fill="currentColor"/>
+      <path d="M280.142 231.35C252.609 231.35 232.076 223.533 218.542 207.9C205.009 192.033 198.242 169.4 198.242 140C198.242 110.6 205.242 88.0833 219.242 72.45C233.242 56.8167 253.309 49 279.442 49C292.509 49 303.826 51.1 313.392 55.3C323.192 59.5 331.126 65.45 337.192 73.15C343.259 80.85 347.342 90.0667 349.442 100.8H328.442C326.109 90.5333 321.326 82.3667 314.092 76.3C307.092 70 295.659 66.85 279.792 66.85C259.959 66.85 244.676 73.15 233.942 85.75C223.442 98.1167 218.192 116.2 218.192 140C218.192 163.8 223.442 182 233.942 194.6C244.676 207.2 259.959 213.5 279.792 213.5C294.959 213.5 306.275 211.05 313.742 206.15C321.209 201.017 326.109 192.85 328.442 181.65H349.792C347.926 191.45 344.076 200.083 338.242 207.55C332.642 215.017 324.942 220.85 315.142 225.05C305.576 229.25 293.909 231.35 280.142 231.35Z" fill="currentColor"/>
+      <path d="M81.2 231.35C55.0667 231.35 35 223.533 21 207.9C7 192.033 0 169.4 0 140C0 110.6 7 88.0833 21 72.45C35 56.8167 55.0667 49 81.2 49C98.7 49 113.4 52.5 125.3 59.5C137.433 66.5 146.65 76.7667 152.95 90.3C159.25 103.833 162.4 120.4 162.4 140C162.4 169.4 155.4 192.033 141.4 207.9C127.4 223.533 107.333 231.35 81.2 231.35ZM81.2 213.5C100.8 213.5 115.85 207.2 126.35 194.6C137.083 182 142.45 163.8 142.45 140C142.45 116.2 137.083 98.1167 126.35 85.75C115.85 73.15 100.8 66.85 81.2 66.85C61.6 66.85 46.4333 73.15 35.7 85.75C25.2 98.1167 19.95 116.2 19.95 140C19.95 163.8 25.2 182 35.7 194.6C46.4333 207.2 61.6 213.5 81.2 213.5Z" fill="currentColor"/>
+    </svg>
+    <div class="credit">
+      <p>octo</p>
+      <p>by Soichiro Iwai</p>
+      <p>&#8203;</p>
+      <p>contact: info@oc-to.com<br />©️octo All Rights Reserved.</p>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(() => {
+  const SPIKES = 8;
+  const CX = 320, CY = 320;
+  const INTERVAL = 1200;
+  const SPIKE_STEP = (Math.PI * 2) / SPIKES;
+
+  const LENGTH_TEMPLATE = [248, 230, 214, 202, 192, 184, 178, 172];
+  const LENGTH_JITTER = 10;
+  const WIDTH_MIN = 115, WIDTH_MAX = 185;
+  const ANGLE_JITTER = 0.22;
+
+  const rand = (min, max) => min + Math.random() * (max - min);
+
+  function shuffled(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function randomState() {
+    const rotation = rand(0, Math.PI * 2 / SPIKES);
+    const lengths = shuffled(LENGTH_TEMPLATE);
+    const spikes = [];
+    for (let i = 0; i < SPIKES; i++) {
+      spikes.push({
+        angle: i * SPIKE_STEP + rand(-ANGLE_JITTER, ANGLE_JITTER) * SPIKE_STEP,
+        length: lengths[i] + rand(-LENGTH_JITTER, LENGTH_JITTER),
+        width: rand(WIDTH_MIN, WIDTH_MAX),
+      });
+    }
+    return { rotation, spikes };
+  }
+
+  function lerpAngle(a, b, t) {
+    let d = b - a;
+    while (d >  Math.PI) d -= Math.PI * 2;
+    while (d < -Math.PI) d += Math.PI * 2;
+    return a + d * t;
+  }
+
+  const easeInOut = t => {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    return t < 0.5
+      ? Math.pow(2, 20 * t - 10) / 2
+      : (2 - Math.pow(2, -20 * t + 10)) / 2;
+  };
+
+  function interpolate(from, to, t) {
+    return {
+      rotation: lerpAngle(from.rotation, to.rotation, t),
+      spikes: from.spikes.map((s, i) => ({
+        angle: lerpAngle(s.angle, to.spikes[i].angle, t),
+        length: s.length + (to.spikes[i].length - s.length) * t,
+        width: s.width + (to.spikes[i].width - s.width) * t,
+      })),
+    };
+  }
+
+  function toPath(state) {
+    const tris = state.spikes.map(s => {
+      const a = s.angle + state.rotation;
+      const dx = Math.cos(a), dy = Math.sin(a);
+      const px = -dy, py = dx;
+      return [
+        [dx * s.length, dy * s.length],
+        [ px * s.width / 2,  py * s.width / 2],
+        [-px * s.width / 2, -py * s.width / 2],
+      ];
+    });
+
+    let areaSum = 0, gx = 0, gy = 0;
+    for (const [A, B1, B2] of tris) {
+      const area = Math.abs((B1[0] - A[0]) * (B2[1] - A[1]) - (B2[0] - A[0]) * (B1[1] - A[1])) / 2;
+      areaSum += area;
+      gx += (A[0] + B1[0] + B2[0]) / 3 * area;
+      gy += (A[1] + B1[1] + B2[1]) / 3 * area;
+    }
+    gx /= areaSum;
+    gy /= areaSum;
+
+    return tris.map(tri =>
+      "M" + tri.map(([x, y]) => (CX + x - gx).toFixed(2) + " " + (CY + y - gy).toFixed(2)).join("L") + "Z"
+    ).join("");
+  }
+
+  const path = document.getElementById("burst");
+  let from = randomState();
+  let to = randomState();
+  let startTime = performance.now();
+
+  function frame(now) {
+    let t = (now - startTime) / INTERVAL;
+    if (t >= 1) {
+      from = to;
+      to = randomState();
+      startTime = now;
+      t = 0;
+    }
+    path.setAttribute("d", toPath(interpolate(from, to, easeInOut(Math.min(t, 1)))));
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
