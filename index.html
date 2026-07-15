@@ -226,10 +226,16 @@
     box-sizing: border-box;
     padding: 20px 10px 20px 20px;
     background: var(--ink);
+    border: 1px solid var(--ink);
     color: #fff;
     font-size: 24px;
     font-weight: 500;
     text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .contact-btn:hover {
+    background: transparent;
+    color: var(--ink);
   }
   .contact-btn svg { margin-right: 10px; display: block; }
 
