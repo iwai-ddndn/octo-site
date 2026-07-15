@@ -147,12 +147,27 @@
     transform: translate(-50%, 50%);
   }
   .contact-chip svg { display: block; }
+  .tagline-chip {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    transform: translate(-50%, -50%);
+  }
 
   /* ── First view (スペーサー) ─────────────── */
   .first-view {
     position: relative;
     height: 100svh;
     min-height: 640px;
+  }
+  .scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: 74px;
+    transform: translate(-50%, 100%);
+    font-size: 12px;
+    font-weight: 300;
+    margin: 0;
   }
 
   /* ── Scroll content ──────────────────────── */
@@ -170,10 +185,10 @@
     display: block;
     color: var(--ink);
   }
-  /* 420pxを基準に、それ以下の画面幅ではそのまま縮む（左右20pxはpaddingで確保） */
+  /* 440pxを基準に、それ以下の画面幅ではそのまま縮む（左右40pxはpaddingで確保） */
   .col {
-    width: min(420px, 100%);
-    padding: 0 20px;
+    width: min(440px, 100%);
+    padding: 0 40px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -190,11 +205,33 @@
     line-height: normal;
     margin: 0;
   }
-  .work .placeholder {
-    height: 400px;
+  .work .thumb {
+    aspect-ratio: 1 / 1;
     border: 1px solid var(--ink);
+    overflow: hidden;
+  }
+  .work .thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .work p { margin: 0; }
+
+  .contact-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: min(360px, 100%);
+    box-sizing: border-box;
+    padding: 20px 10px 20px 20px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 24px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .contact-btn svg { margin-right: 10px; display: block; }
 
   /* ── Footer ──────────────────────────────── */
   footer {
@@ -238,10 +275,11 @@
 <div id="chips">
   <span class="chip edge-label-left">octo</span>
   <span class="chip edge-label-right">octo</span>
+  <span class="chip tagline-chip">multi design studio</span>
   <a class="chip contact-chip" href="mailto:info@oc-to.com">
     contact
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M9.5 9.5H2.5V2.5H6V1.5H2.5C1.945 1.5 1.5 1.95 1.5 2.5V9.5C1.5 10.05 1.945 10.5 2.5 10.5H9.5C10.05 10.5 10.5 10.05 10.5 9.5V6H9.5V9.5ZM7 1.5V2.5H8.795L3.88 7.415L4.585 8.12L9.5 3.205V5H10.5V1.5H7Z" fill="currentColor"/>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 5L13.59 6.41L18.17 11H2V13H18.17L13.58 17.59L15 19L22 12L15 5Z" fill="currentColor"/>
     </svg>
   </a>
 </div>
@@ -251,7 +289,9 @@
 <div id="scroller">
 <div class="page">
 
-  <section class="first-view"></section>
+  <section class="first-view">
+    <p class="scroll-cue">SCROLL</p>
+  </section>
 
   <div class="content">
 
@@ -267,35 +307,44 @@
 
       <div class="work">
         <h2>Web Design</h2>
-        <div class="placeholder"></div>
-        <p class="jp">あああああ</p>
+        <div class="thumb"><img src="assets/web.png" alt="Web Design" /></div>
+        <p class="jp">1枚のLPから複雑なコーポレートサイトまで。studioでの実装も請け負います。</p>
       </div>
 
       <div class="work">
         <h2>UI/UX Design</h2>
-        <div class="placeholder"></div>
+        <div class="thumb"><img src="assets/uiux.png" alt="UI/UX Design" /></div>
         <p class="jp">複雑で曖昧な領域を画面デザインまで落とし込みます。ビジョンやシナリオから、画面デザインとデザインガイドラインまで。0→1の開発も、既存プロダクトの改善も。2B領域が専門ですが、2C領域も受け入れていますのでご相談ください。</p>
       </div>
 
       <div class="work">
         <h2>Graphic Design</h2>
-        <div class="placeholder"></div>
-        <p class="jp">ああああ</p>
+        <div class="thumb"><img src="assets/graphic.png" alt="Graphic Design" /></div>
+        <p class="jp">ロゴ、チラシ、冊子、名刺など、必要なデザインを一括で制作します。入稿までサポートしますので、初めての方もご安心ください。</p>
       </div>
 
       <div class="work">
         <h2>AI Creative</h2>
-        <div class="placeholder"></div>
-        <p class="jp">ああああ</p>
+        <div class="thumb"><img src="assets/ai.png" alt="AI Creative" /></div>
+        <p class="jp">ChatGPT/Gemini/Claudeを利用したアウトプットの作成・活用サポートを承ります。AIで作成したWeb・アプリ・UI・グラフィックの修正依頼も受け付けております。</p>
       </div>
     </div>
 
     <div class="col">
       <div class="work">
-        <div class="placeholder"></div>
+        <div class="thumb"><img src="assets/profile.jpg" alt="Soichiro Iwai" /></div>
         <h2>Soichiro Iwai</h2>
-        <p class="jp">千葉大学デザイン学科卒業。新卒で制作会社に入社、富士通デザインを経て2023年にフリーランスとして独立。</p>
+        <p class="jp">千葉大学デザイン学科卒業。新卒で制作会社に入社。富士通株式会社を経て2023年にフリーランスとして独立。</p>
       </div>
+    </div>
+
+    <div class="col">
+      <a class="contact-btn" href="mailto:info@oc-to.com">
+        CONTACT
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 5L13.59 6.41L18.17 11H2V13H18.17L13.58 17.59L15 19L22 12L15 5Z" fill="currentColor"/>
+        </svg>
+      </a>
     </div>
 
   </div>
