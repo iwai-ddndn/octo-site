@@ -34,11 +34,12 @@
     font-family: "42dot Sans", "Noto Sans JP", sans-serif;
     color: var(--ink);
   }
+  /* #scrollerにはstacking contextを作らせない(position/z-index無し):
+     内部の.thumbのz-indexがルート文脈に直接参加し、
+     body直下のブレンド層(z10-20)より上に出られるようにするため */
   #scroller {
     height: 100%;
     overflow-y: auto;
-    position: relative;
-    z-index: 1;
     /* 右端に常駐するスクロールバーがfixedの枠線との間隔を潰すため非表示に */
     scrollbar-width: none;
   }
@@ -120,7 +121,7 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 15;
+    z-index: 40; /* 画像タイル(z30)より上 */
   }
   #chips a { pointer-events: auto; }
   .chip {
@@ -210,10 +211,15 @@
     line-height: normal;
     margin: 0;
   }
+  /* 画像タイルは合成の外（tintより上）に出し、色反転させない。
+     ブレンド層より上に描画されるため、色は最終カラーを直接指定する */
   .work .thumb {
     aspect-ratio: 1 / 1;
-    border: 1px solid var(--ink);
+    border: 1px solid #2962ff;
+    background: #fff;
     overflow: hidden;
+    position: relative;
+    z-index: 30;
   }
   .work .thumb img {
     display: block;
@@ -276,18 +282,6 @@
 </head>
 <body>
 
-<svg id="logo" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
-  <path id="burst" fill="#fff" />
-</svg>
-
-<div id="frame">
-  <div class="border-line"></div>
-  <div class="corner tl"></div>
-  <div class="corner tr"></div>
-  <div class="corner bl"></div>
-  <div class="corner br"></div>
-</div>
-
 <div id="chips">
   <span class="chip edge-label-left">octo</span>
   <span class="chip edge-label-right">octo</span>
@@ -298,6 +292,18 @@
       <path d="M15 5L13.59 6.41L18.17 11H2V13H18.17L13.58 17.59L15 19L22 12L15 5Z" fill="currentColor"/>
     </svg>
   </a>
+</div>
+
+<svg id="logo" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+  <path id="burst" fill="#fff" />
+</svg>
+
+<div id="frame">
+  <div class="border-line"></div>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
 </div>
 
 <div id="tint"></div>
