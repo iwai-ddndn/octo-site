@@ -57,7 +57,7 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: min(640px, 88vmin);
+    width: min(768px, 105.6vmin);
     height: auto;
     mix-blend-mode: difference;
     pointer-events: none;
@@ -134,7 +134,8 @@
     gap: 4px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--ink);
+    /* チップはブレンド層(z20)より上に描画されるため、最終カラーを直接指定する */
+    color: #2962ff;
     text-decoration: none;
     white-space: nowrap;
   }
@@ -325,7 +326,7 @@
     </svg>
 
     <div class="col">
-      <p class="jp" style="margin:0">octoは、マルチな領域で活動するデザインスタジオです。</p>
+      <p class="jp" style="margin:0; text-align:center">octoは、マルチな領域で活動する<br />デザインスタジオです。</p>
 
       <div class="work">
         <h2>Web Design</h2>
@@ -504,6 +505,53 @@
   scroller.addEventListener("scroll", () => {
     scrollCue.classList.toggle("is-hidden", scroller.scrollTop > 10);
   }, { passive: true });
+
+  // タイプライター出現: 1文字ずつspanで包んで visibility で隠し、
+  // スクロールインしたら順に表示する（visibility なので行送りは崩れない）
+  const TYPE_INTERVAL = 40;     // 1文字あたりのms
+  const TYPE_MAX_DURATION = 1600; // 長文はこの時間に収まるよう加速
+
+  function wrapChars(el) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    const spans = [];
+    for (const node of textNodes) {
+      const frag = document.createDocumentFragment();
+      for (const ch of node.nodeValue) {
+        const s = document.createElement("span");
+        s.textContent = ch;
+        s.style.visibility = "hidden";
+        frag.appendChild(s);
+        spans.push(s);
+      }
+      node.parentNode.replaceChild(frag, node);
+    }
+    return spans;
+  }
+
+  const typeSpans = new Map();
+  document.querySelectorAll(".content h2, .content .jp").forEach(el => {
+    typeSpans.set(el, wrapChars(el));
+  });
+
+  const typeObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      typeObserver.unobserve(entry.target);
+      const spans = typeSpans.get(entry.target);
+      if (!spans || !spans.length) continue;
+      const interval = Math.min(TYPE_INTERVAL, TYPE_MAX_DURATION / spans.length);
+      let i = 0;
+      const timer = setInterval(() => {
+        spans[i].style.visibility = "visible";
+        i++;
+        if (i >= spans.length) clearInterval(timer);
+      }, interval);
+    }
+  }, { root: scroller, threshold: 0.2 });
+
+  typeSpans.forEach((_, el) => typeObserver.observe(el));
 })();
 </script>
 
