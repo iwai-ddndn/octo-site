@@ -12,7 +12,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3Cpath fill='%232962FF' d='M549 412L291 387L348 248ZM411 486L262 349L376 287ZM230 512L247 284L392 351ZM161 399L291 262L348 373ZM108 227L348 251L291 384ZM229 157L378 284L261 351ZM395 130L391 346L247 289ZM472 238L347 371L291 264Z'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=42dot+Sans:wght@400;500;600&family=Noto+Sans+JP:wght@500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=42dot+Sans:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;500&display=swap" rel="stylesheet" />
 <style>
   /*
    * 白抜き合成のため、DOM上はすべて「黒 + 白」で組む。
@@ -56,7 +56,9 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
+    /* CONTACTモーダル開閉時に--burst-scaleを変えて画面を覆うまで拡大する */
+    transform: translate(-50%, -50%) scale(var(--burst-scale, 1));
+    transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
     width: min(768px, 105.6vmin);
     height: auto;
     mix-blend-mode: difference;
@@ -255,6 +257,120 @@
     transition: transform 0.15s ease;
   }
   .contact-btn:hover svg { transform: translateX(12px); }
+  button.contact-btn {
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .contact-btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* ── CONTACTモーダル ─────────────────────── */
+  /* フォームもブレンド合成の内側なので「黒＋白」で組む。
+     開いている間はバーストが画面を覆うため黒⇔白が反転し、
+     「青地に白ラベル・白枠 / フォーカスで白地に青文字」になる */
+  #main-view { transition: opacity 0.3s ease; }
+  #main-view.is-fading { opacity: 0; }
+  #contact-view { display: none; }
+  body.contact-open #contact-view { display: block; }
+  .contact-inner {
+    width: min(680px, 100%);
+    margin: 0 auto;
+    padding: 80px 40px 120px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    opacity: 0;
+    transform: translateY(48px);
+    transition: opacity 0.3s ease, transform 0.3s ease-in; /* 退場用 */
+  }
+  .contact-inner.is-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); /* 入場用 */
+  }
+  #contact-thanks-panel {
+    align-items: center;
+    text-align: center;
+  }
+  /* display:flexがhidden属性のUAスタイルに勝ってしまうため明示する */
+  .contact-inner[hidden] { display: none; }
+  .contact-close {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink);
+    align-self: flex-start;
+  }
+  .contact-close svg { display: block; }
+  .contact-head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .contact-head h2 {
+    margin: 0;
+    font-size: 48px;
+    font-weight: 300;
+    line-height: normal;
+  }
+  .contact-head .jp { margin: 0; }
+  #contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .field label {
+    font-family: "Noto Sans JP", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 0 8px;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    font-family: "Noto Sans JP", sans-serif;
+    font-weight: 300;
+    font-size: 18px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .field textarea {
+    height: 206px;
+    resize: none;
+  }
+  /* 反転合成後に「青地に40%白」に見える値。半透明黒(0.4)だと反転後が
+     濃くなりすぎて読めないため、反転結果から逆算したグレー実色を使う */
+  .field input::placeholder, .field textarea::placeholder { color: #808080; opacity: 1; }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    background: var(--ink);
+    color: #fff;
+    caret-color: #fff;
+  }
+  .field input:focus::placeholder, .field textarea:focus::placeholder { color: rgba(255, 255, 255, 0.4); }
+  .form-error {
+    display: none;
+    margin: 0;
+    text-align: center;
+  }
+  .form-error.is-visible { display: block; }
 
   /* ── Footer ──────────────────────────────── */
   footer {
@@ -287,7 +403,7 @@
   <span class="chip edge-label-left">octo</span>
   <span class="chip edge-label-right">octo</span>
   <span class="chip tagline-chip">multi design studio</span>
-  <a class="chip contact-chip" href="mailto:info@oc-to.com">
+  <a class="chip contact-chip js-open-contact" href="#contact">
     contact
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M15 5L13.59 6.41L18.17 11H2V13H18.17L13.58 17.59L15 19L22 12L15 5Z" fill="currentColor"/>
@@ -310,6 +426,7 @@
 <div id="tint"></div>
 
 <div id="scroller">
+<div id="main-view">
 <div class="page">
 
   <section class="first-view">
@@ -362,7 +479,7 @@
     </div>
 
     <div class="col">
-      <a class="contact-btn" href="mailto:info@oc-to.com">
+      <a class="contact-btn js-open-contact" href="#contact">
         CONTACT
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 5L13.59 6.41L18.17 11H2V13H18.17L13.58 17.59L15 19L22 12L15 5Z" fill="currentColor"/>
@@ -388,6 +505,69 @@
       <p>contact: info@oc-to.com<br />&copy;octo All Rights Reserved.</p>
     </div>
   </footer>
+
+</div><!-- /#main-view -->
+
+<div id="contact-view">
+
+  <div class="contact-inner" id="contact-form-panel">
+    <button class="contact-close" id="contact-close" type="button" aria-label="閉じる">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+      </svg>
+    </button>
+    <div class="contact-head">
+      <h2>CONTACT</h2>
+      <p class="jp">具体的な要件が決まっていなくても構いません。プロジェクトの現状や課題感をお聞かせください。<br />2〜3営業日以内にご連絡いたします。連絡が来ない場合は、お手数ですがもう一度お送りください。</p>
+    </div>
+    <form id="contact-form">
+      <input type="hidden" name="_subject" value="【oc-to.com】お問い合わせ" />
+      <input type="hidden" name="_template" value="table" />
+      <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
+      <div class="field">
+        <label for="cf-name">お名前 *</label>
+        <input id="cf-name" name="お名前" type="text" placeholder="例）岩井　宗一郎" autocomplete="name" required />
+      </div>
+      <div class="field">
+        <label for="cf-company">貴社名 *</label>
+        <input id="cf-company" name="貴社名" type="text" placeholder="例）octo" autocomplete="organization" required />
+      </div>
+      <div class="field">
+        <label for="cf-department">ご所属</label>
+        <input id="cf-department" name="ご所属" type="text" placeholder="例）デザイン部" autocomplete="organization-title" />
+      </div>
+      <div class="field">
+        <label for="cf-email">メールアドレス *</label>
+        <input id="cf-email" name="メールアドレス" type="email" placeholder="例）info@oc-to.com" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="cf-message">ご依頼内容 *</label>
+        <textarea id="cf-message" name="ご依頼内容" placeholder="ご入力ください。" required></textarea>
+      </div>
+      <p class="form-error jp" id="form-error">送信できませんでした。時間をおいてもう一度お試しください。</p>
+      <button class="contact-btn" id="contact-send" type="submit">
+        <span id="send-label">SEND</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 5L13.59 6.41L18.17 11H2V13H18.17L13.58 17.59L15 19L22 12L15 5Z" fill="currentColor"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <div class="contact-inner" id="contact-thanks-panel" hidden>
+    <div class="contact-head">
+      <h2>THANK YOU</h2>
+      <p class="jp">お問い合わせありがとうございます。<br />2〜3営業日以内に、ご入力いただいたメールアドレス宛にご連絡いたします。<br />連絡が届かない場合は、お手数ですがもう一度お送りください。</p>
+    </div>
+    <a class="contact-btn" id="contact-home" href="#top">
+      HOME
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 5L13.59 6.41L18.17 11H2V13H18.17L13.58 17.59L15 19L22 12L15 5Z" fill="currentColor"/>
+      </svg>
+    </a>
+  </div>
+
+</div><!-- /#contact-view -->
 
 </div><!-- /#scroller -->
 
@@ -552,6 +732,111 @@
   }, { root: scroller, threshold: 0.2 });
 
   typeSpans.forEach((_, el) => typeObserver.observe(el));
+
+  // ── CONTACTモーダル ─────────────────────────
+  // 送信先(FormSubmit)。info@oc-to.com が受信可能になったあと、
+  // 初回送信時に届く認証メールで有効化する必要がある
+  const FORM_ENDPOINT = "https://formsubmit.co/ajax/info@oc-to.com";
+
+  const logo = document.getElementById("logo");
+  const mainView = document.getElementById("main-view");
+  const formPanel = document.getElementById("contact-form-panel");
+  const thanksPanel = document.getElementById("contact-thanks-panel");
+  const contactForm = document.getElementById("contact-form");
+  const sendBtn = document.getElementById("contact-send");
+  const sendLabel = document.getElementById("send-label");
+  const formError = document.getElementById("form-error");
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  let contactOpen = false;
+  let animating = false;
+  let savedScrollTop = 0;
+
+  // バーストが画面を覆う拡大率: ビューポート対角線とロゴ表示幅から算出
+  // (係数はトゲの谷間の白い切れ込みが端に残る程度に調整)
+  function burstCoverScale() {
+    const w = parseFloat(getComputedStyle(logo).width);
+    return (Math.hypot(window.innerWidth, window.innerHeight) / w) * 1.9;
+  }
+
+  // フェード・バースト拡大・フォーム入場を重ねてシームレスに繋ぐ。
+  // main-view⇔contact-viewの入れ替えだけは同一スクローラー内のため
+  // 瞬時に行うが、両者ともopacity 0の瞬間に行うので継ぎ目は見えない
+  async function openContact() {
+    if (contactOpen || animating) return;
+    animating = true;
+    contactOpen = true;
+    savedScrollTop = scroller.scrollTop;
+    mainView.classList.add("is-fading");
+    document.documentElement.style.setProperty("--burst-scale", burstCoverScale());
+    await wait(300);
+    mainView.hidden = true;
+    document.body.classList.add("contact-open");
+    scroller.scrollTop = 0;
+    requestAnimationFrame(() => requestAnimationFrame(() => formPanel.classList.add("is-in")));
+    await wait(650);
+    animating = false;
+  }
+
+  async function closeContact(toTop) {
+    if (!contactOpen || animating) return;
+    animating = true;
+    const active = thanksPanel.hidden ? formPanel : thanksPanel;
+    active.classList.remove("is-in");
+    document.documentElement.style.setProperty("--burst-scale", 1);
+    await wait(320);
+    document.body.classList.remove("contact-open");
+    mainView.hidden = false;
+    scroller.scrollTop = toTop ? 0 : savedScrollTop;
+    requestAnimationFrame(() => requestAnimationFrame(() => mainView.classList.remove("is-fading")));
+    // 次回オープンに備えてリセット
+    contactForm.reset();
+    formError.classList.remove("is-visible");
+    thanksPanel.hidden = true;
+    formPanel.hidden = false;
+    await wait(650);
+    contactOpen = false;
+    animating = false;
+  }
+
+  document.querySelectorAll(".js-open-contact").forEach(el =>
+    el.addEventListener("click", e => { e.preventDefault(); openContact(); })
+  );
+  document.getElementById("contact-close").addEventListener("click", () => closeContact(false));
+  document.getElementById("contact-home").addEventListener("click", e => { e.preventDefault(); closeContact(true); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeContact(false); });
+  window.addEventListener("resize", () => {
+    if (contactOpen) document.documentElement.style.setProperty("--burst-scale", burstCoverScale());
+  });
+
+  contactForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!contactForm.reportValidity()) return;
+    sendBtn.disabled = true;
+    sendLabel.textContent = "SENDING";
+    formError.classList.remove("is-visible");
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: { "Accept": "application/json" },
+        body: new FormData(contactForm),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json().catch(() => ({}));
+      if (String(data.success) === "false") throw new Error(data.message || "rejected");
+      formPanel.classList.remove("is-in");
+      await wait(400);
+      formPanel.hidden = true;
+      thanksPanel.hidden = false;
+      scroller.scrollTop = 0;
+      requestAnimationFrame(() => requestAnimationFrame(() => thanksPanel.classList.add("is-in")));
+    } catch (err) {
+      formError.classList.add("is-visible");
+    } finally {
+      sendBtn.disabled = false;
+      sendLabel.textContent = "SEND";
+    }
+  });
 })();
 </script>
 
