@@ -12,7 +12,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3Cpath fill='%232962FF' d='M549 412L291 387L348 248ZM411 486L262 349L376 287ZM230 512L247 284L392 351ZM161 399L291 262L348 373ZM108 227L348 251L291 384ZM229 157L378 284L261 351ZM395 130L391 346L247 289ZM472 238L347 371L291 264Z'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=42dot+Sans:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=42dot+Sans:wght@300;400;500;600&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   /*
    * 白抜き合成のため、DOM上はすべて「黒 + 白」で組む。
@@ -369,7 +369,9 @@
     box-sizing: border-box;
     padding: 12px;
     font-family: "Noto Sans JP", sans-serif;
-    font-weight: 300;
+    /* Figma指定はDemiLight(300)だが、difference反転を通ると細字はAA縁の
+       比率が大きく濁って見えるため1段上げる */
+    font-weight: 400;
     font-size: 18px;
     color: var(--ink);
     background: transparent;
