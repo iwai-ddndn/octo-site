@@ -381,9 +381,10 @@
     height: 206px;
     resize: none;
   }
-  /* 反転合成後に「青地に40%白」に見える値。半透明黒(0.4)だと反転後が
-     濃くなりすぎて読めないため、反転結果から逆算したグレー実色を使う */
-  .field input::placeholder, .field textarea::placeholder { color: #737373; opacity: 1; }
+  /* Figmaのenable状態「青地に白60%」を反転合成から逆算した実色。
+     グレーだと反転後にG成分が沈んでピンク寄りに濁るため、
+     チャンネルごとに 255-目標値 を取った色にする(目標=白60%on青=(169,192,255)) */
+  .field input::placeholder, .field textarea::placeholder { color: #563f00; opacity: 1; }
   .field input:focus, .field textarea:focus {
     outline: none;
     background: var(--ink);
