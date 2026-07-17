@@ -151,10 +151,13 @@
     letter-spacing: 0.22em;
     min-height: 1.4em;
   }
+  /* %は星の中心に重ねる。星(z10,白)の下のレイヤーなので、
+     星と重なる部分はdifference反転で青く「白抜き」になる */
   #loader-pct {
     position: absolute;
-    right: 40px;
-    bottom: 26px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     font-size: 48px;
     font-weight: 300;
     letter-spacing: 0.04em;
@@ -172,7 +175,7 @@
   /* ローダー除去の瞬間に星をscale 0へ飛ばし（transitionなし）、
      直後にキュッと一息で拡大して本編に登場させる */
   body.no-burst-transition #logo { transition: none; }
-  body.is-entering #logo { transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+  body.is-entering #logo { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 
   /* 白地チップは反転させない通常レイヤー */
   #chips {
@@ -936,16 +939,6 @@
   const loaderPct = document.getElementById("loader-pct");
   const themeMeta = document.querySelector('meta[name="theme-color"]');
 
-  // 谷間まで含めて画面を完全に覆う倍率。burstCoverScale()はモーダル用に
-  // 「切れ込みが端に残る程度」の係数なのでワイプには足りない。
-  // 中央では8三角形の底辺が重なり合っており、その塊の最小半径は
-  // min(底辺幅115)/2 = 57.5 (viewBox 640基準)。これが対角線の半分を
-  // 超えるまで拡大すれば谷間も残らない
-  function burstFullCoverScale() {
-    const w = parseFloat(getComputedStyle(logo).width);
-    return (Math.hypot(window.innerWidth, window.innerHeight) / 2) / (w * 57.5 / 640) * 1.15;
-  }
-
   let loadedUnits = 0;
   const imgs = Array.from(document.images);
   const totalUnits = imgs.length + 1; // +1 = フォント
@@ -974,16 +967,38 @@
       loaderPct.textContent = pct;
       await wait(rand(50, 150));
     }
-    await wait(350);
-    loader.classList.add("is-done");
+    await wait(120);
+    loader.classList.add("is-done"); // 100になった数字・文字をフェードアウト
     await wait(300);
-    // 白ワイプ: --burst-scale機構で星が画面を完全に白で満たす
-    document.documentElement.style.setProperty("--burst-scale", burstFullCoverScale());
-    await wait(950); // transition 0.9s + 完全に広がり切るまでの余裕
+    // 白ワイプ: 星が画面を完全に覆うまで拡大する。
+    // transform(scale)の拡大はコンポジタが小さいラスタ画像を引き伸ばすため
+    // 縁がモーションブラー状に滲む。scaleを1に正規化した上でwidthを
+    // rAFで直接動かし、毎フレーム再ラスタライズさせてシャープに保つ
+    const loaderScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--burst-scale")) || 0.34;
+    const startW = parseFloat(getComputedStyle(logo).width) * loaderScale;
+    document.body.classList.add("no-burst-transition");
+    document.documentElement.style.setProperty("--burst-scale", 1);
+    logo.style.width = startW + "px"; // scale正規化と同時なので見た目は不変
+    document.body.offsetHeight;
+    document.body.classList.remove("no-burst-transition");
+    // 中央の「底辺の束」(最小半径 = min底辺幅115/2 = 57.5, viewBox 640基準)が
+    // 画面対角線の半分を超える幅まで広げれば、谷間の切れ込みも残らない
+    const targetW = (Math.hypot(window.innerWidth, window.innerHeight) / 2) / (57.5 / 640) * 1.15;
+    const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    await new Promise(resolve => {
+      const t1 = performance.now();
+      const frame = now => {
+        const p = Math.min((now - t1) / 900, 1);
+        logo.style.width = startW + (targetW - startW) * easeInOutCubic(p) + "px";
+        if (p < 1) requestAnimationFrame(frame); else resolve();
+      };
+      requestAnimationFrame(frame);
+    });
     // 白で満ちた瞬間: 黒地を外し（以降、星は白背景上=青に見える）、
     // 星をscale 0からキュッと一息に拡大して本編へ
     document.body.classList.add("no-burst-transition");
     document.documentElement.style.setProperty("--burst-scale", 0);
+    logo.style.width = ""; // 本来のサイズ指定に戻す
     loader.remove();
     themeMeta.setAttribute("content", "#ffffff"); // ステータスバー領域を白へ
     document.body.classList.remove("is-loading"); // チップ・SCROLLがフェードイン
@@ -999,6 +1014,7 @@
     loader.remove();
     themeMeta.setAttribute("content", "#ffffff");
     document.body.classList.remove("is-loading", "is-entering", "no-burst-transition");
+    logo.style.width = "";
     document.documentElement.style.setProperty("--burst-scale", 1);
   });
 })();
