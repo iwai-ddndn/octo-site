@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- iOS Safariがページ上部の色をステータスバー領域に反映するため明示する。
+     ローディング中は青、本編に入る瞬間にJSが#fffへ切り替える -->
+<meta name="theme-color" content="#2962ff" />
 <title>octo — design studio</title>
 <meta name="description" content="octoは、マルチな領域で活動するデザインスタジオです。Web Design / UI/UX Design / Graphic Design / AI Creative" />
 <meta property="og:title" content="octo — design studio" />
@@ -931,6 +934,17 @@
   const loader = document.getElementById("loader");
   const loaderWord = document.getElementById("loader-word");
   const loaderPct = document.getElementById("loader-pct");
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+  // 谷間まで含めて画面を完全に覆う倍率。burstCoverScale()はモーダル用に
+  // 「切れ込みが端に残る程度」の係数なのでワイプには足りない。
+  // 中央では8三角形の底辺が重なり合っており、その塊の最小半径は
+  // min(底辺幅115)/2 = 57.5 (viewBox 640基準)。これが対角線の半分を
+  // 超えるまで拡大すれば谷間も残らない
+  function burstFullCoverScale() {
+    const w = parseFloat(getComputedStyle(logo).width);
+    return (Math.hypot(window.innerWidth, window.innerHeight) / 2) / (w * 57.5 / 640) * 1.15;
+  }
 
   let loadedUnits = 0;
   const imgs = Array.from(document.images);
@@ -963,14 +977,15 @@
     await wait(350);
     loader.classList.add("is-done");
     await wait(300);
-    // 白ワイプ: CONTACTモーダルと同じ機構で星が画面を白で満たす
-    document.documentElement.style.setProperty("--burst-scale", burstCoverScale());
-    await wait(900);
+    // 白ワイプ: --burst-scale機構で星が画面を完全に白で満たす
+    document.documentElement.style.setProperty("--burst-scale", burstFullCoverScale());
+    await wait(950); // transition 0.9s + 完全に広がり切るまでの余裕
     // 白で満ちた瞬間: 黒地を外し（以降、星は白背景上=青に見える）、
     // 星をscale 0からキュッと一息に拡大して本編へ
     document.body.classList.add("no-burst-transition");
     document.documentElement.style.setProperty("--burst-scale", 0);
     loader.remove();
+    themeMeta.setAttribute("content", "#ffffff"); // ステータスバー領域を白へ
     document.body.classList.remove("is-loading"); // チップ・SCROLLがフェードイン
     document.body.offsetHeight; // reflow: scale 0を確定させてから
     document.body.classList.remove("no-burst-transition");
@@ -982,6 +997,7 @@
   runLoader().catch(() => {
     // 万一失敗しても本編は必ず表示する
     loader.remove();
+    themeMeta.setAttribute("content", "#ffffff");
     document.body.classList.remove("is-loading", "is-entering", "no-burst-transition");
     document.documentElement.style.setProperty("--burst-scale", 1);
   });
