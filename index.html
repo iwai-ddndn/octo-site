@@ -245,7 +245,7 @@
     font-size: 24px;
     font-weight: 500;
     text-decoration: none;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.3s ease;
   }
   .contact-btn:hover {
     background: transparent;
@@ -270,9 +270,35 @@
   /* フォームもブレンド合成の内側なので「黒＋白」で組む。
      開いている間はバーストが画面を覆うため黒⇔白が反転し、
      「青地に白ラベル・白枠 / フォーカスで白地に青文字」になる */
-  #main-view { transition: opacity 0.3s ease; }
-  #main-view.is-fading { opacity: 0; }
-  #contact-view { display: none; }
+  /* #main-view自体にopacityを掛けるとフェード中だけstacking contextが
+     生まれ、.thumb(z30)がブレンド層より下に落ちて「バーストが写真に
+     一瞬被る」ため、写真の祖先ではなく要素単位でフェードする
+     （.thumbは自身がz30を持つので、自身のopacityなら重なり順を保つ。
+       footerは内部にz要素が無いので丸ごとでよい） */
+  #main-view .wordmark,
+  #main-view .scroll-cue,
+  #main-view h2,
+  #main-view .jp,
+  #main-view .thumb,
+  #main-view footer {
+    transition: opacity 0.3s ease;
+  }
+  #main-view.is-fading .wordmark,
+  #main-view.is-fading .scroll-cue,
+  #main-view.is-fading h2,
+  #main-view.is-fading .jp,
+  #main-view.is-fading .thumb,
+  #main-view.is-fading footer,
+  #main-view.is-fading .contact-btn {
+    opacity: 0;
+  }
+  #contact-view {
+    display: none;
+    /* difference反転を通るテキストはサブピクセルAAだと色フリンジが出て
+       読みにくいため、グレースケールAAに固定する */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body.contact-open #contact-view { display: block; }
   .contact-inner {
     width: min(680px, 100%);
@@ -357,7 +383,7 @@
   }
   /* 反転合成後に「青地に40%白」に見える値。半透明黒(0.4)だと反転後が
      濃くなりすぎて読めないため、反転結果から逆算したグレー実色を使う */
-  .field input::placeholder, .field textarea::placeholder { color: #808080; opacity: 1; }
+  .field input::placeholder, .field textarea::placeholder { color: #737373; opacity: 1; }
   .field input:focus, .field textarea:focus {
     outline: none;
     background: var(--ink);
@@ -734,9 +760,9 @@
   typeSpans.forEach((_, el) => typeObserver.observe(el));
 
   // ── CONTACTモーダル ─────────────────────────
-  // 送信先(FormSubmit)。info@oc-to.com が受信可能になったあと、
-  // 初回送信時に届く認証メールで有効化する必要がある
-  const FORM_ENDPOINT = "https://formsubmit.co/ajax/info@oc-to.com";
+  // 送信先(FormSubmit、oc-to.comドメインで認証済み)。
+  // ランダム文字列は info@oc-to.com のエイリアス（アドレス露出を避ける）
+  const FORM_ENDPOINT = "https://formsubmit.co/ajax/15d40c22b55c094ee042d50d16a74b02";
 
   const logo = document.getElementById("logo");
   const mainView = document.getElementById("main-view");
