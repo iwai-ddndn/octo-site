@@ -21,6 +21,9 @@
    */
   :root {
     --ink: #000;
+    /* 初期値=ローディング中の縮小率。ロード完了時にJSが1へ戻す
+       （CONTACTモーダルはdocumentElementのインラインstyleで上書きする） */
+    --burst-scale: 0.34;
   }
   html, body {
     margin: 0;
@@ -117,6 +120,56 @@
   .corner.tl::before { left: 0; }
   .corner.tl::after, .corner.tr::after { top: 0; }
   .corner.bl::after, .corner.br::after { bottom: 0; }
+
+  /* ── ローディング ─────────────────────────── */
+  /* DOM上は黒地+白文字のオーバーレイ(z5)。#tint(lighten)が黒→青へ置換し、
+     その上に#logo(z10)の白い星・#frame(z11)の白い罫線が乗るため、
+     画面上は「青地に白い星・白い罫線・白文字」（フッターと同じ反転世界）になる。
+     完了時はCONTACTモーダルと同じ--burst-scale機構で星が画面を白で満たし、
+     黒地を外してから星をキュッと拡大し直して本編（白地に青い星）へ接続する */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+    z-index: 5; /* #scrollerより上、ブレンド層(z10-)より下 */
+  }
+  #loader p {
+    margin: 0;
+    color: #fff;
+    transition: opacity 0.3s ease;
+  }
+  #loader-word {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + min(150px, 22vmin));
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    min-height: 1.4em;
+  }
+  #loader-pct {
+    position: absolute;
+    right: 40px;
+    bottom: 26px;
+    font-size: 48px;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  /* 完了時の文字はopacityで消す（星はfixedなので位置に影響しない） */
+  #loader.is-done p { opacity: 0; }
+  /* ローディング中はチップ・SCROLL・スクロール操作を止める。
+     ローダー(z5)より上に出る.thumb(z30)も念のため隠す */
+  body.is-loading #chips { opacity: 0; pointer-events: none; }
+  #chips { transition: opacity 0.5s ease 0.15s; }
+  body.is-loading .scroll-cue { opacity: 0; }
+  body.is-loading .thumb { visibility: hidden; }
+  body.is-loading #scroller { overflow: hidden; }
+  /* ローダー除去の瞬間に星をscale 0へ飛ばし（transitionなし）、
+     直後にキュッと一息で拡大して本編に登場させる */
+  body.no-burst-transition #logo { transition: none; }
+  body.is-entering #logo { transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
 
   /* 白地チップは反転させない通常レイヤー */
   #chips {
@@ -426,7 +479,12 @@
   footer .credit p { margin: 0; }
 </style>
 </head>
-<body>
+<body class="is-loading">
+
+<div id="loader" aria-hidden="true">
+  <p id="loader-word"></p>
+  <p id="loader-pct">0</p>
+</div>
 
 <div id="chips">
   <span class="chip edge-label-left">octo</span>
@@ -865,6 +923,67 @@
       sendBtn.disabled = false;
       sendLabel.textContent = "SEND";
     }
+  });
+
+  /* ── ローディング演出 ─────────────────────── */
+  // 実ロード進捗 = 画像 + フォント。%は実進捗が終わるまで96で足踏みし、
+  // 完了（またはタイムアウト4s）で100まで走る
+  const loader = document.getElementById("loader");
+  const loaderWord = document.getElementById("loader-word");
+  const loaderPct = document.getElementById("loader-pct");
+
+  let loadedUnits = 0;
+  const imgs = Array.from(document.images);
+  const totalUnits = imgs.length + 1; // +1 = フォント
+  const countUnit = () => loadedUnits++;
+  imgs.forEach(img => {
+    if (img.complete) loadedUnits++;
+    else {
+      img.addEventListener("load", countUnit, { once: true });
+      img.addEventListener("error", countUnit, { once: true });
+    }
+  });
+  document.fonts.ready.then(countUnit);
+
+  async function runLoader() {
+    const word = "oc-to";
+    for (let i = 1; i <= word.length; i++) {
+      loaderWord.textContent = word.slice(0, i) + (i < word.length ? "_" : "");
+      await wait(120);
+    }
+    const t0 = performance.now();
+    let pct = 0;
+    while (pct < 100) {
+      const done = loadedUnits >= totalUnits || performance.now() - t0 > 4000;
+      pct = done ? Math.min(100, pct + Math.ceil(rand(6, 14)))
+                 : Math.min(96, pct + Math.ceil(rand(1, 6)));
+      loaderPct.textContent = pct;
+      await wait(rand(50, 150));
+    }
+    await wait(350);
+    loader.classList.add("is-done");
+    await wait(300);
+    // 白ワイプ: CONTACTモーダルと同じ機構で星が画面を白で満たす
+    document.documentElement.style.setProperty("--burst-scale", burstCoverScale());
+    await wait(900);
+    // 白で満ちた瞬間: 黒地を外し（以降、星は白背景上=青に見える）、
+    // 星をscale 0からキュッと一息に拡大して本編へ
+    document.body.classList.add("no-burst-transition");
+    document.documentElement.style.setProperty("--burst-scale", 0);
+    loader.remove();
+    document.body.classList.remove("is-loading"); // チップ・SCROLLがフェードイン
+    document.body.offsetHeight; // reflow: scale 0を確定させてから
+    document.body.classList.remove("no-burst-transition");
+    document.body.classList.add("is-entering");
+    document.documentElement.style.setProperty("--burst-scale", 1);
+    await wait(470);
+    document.body.classList.remove("is-entering");
+  }
+  runLoader().catch(() => {
+    // 万一失敗しても本編は必ず表示する
+    loader.remove();
+    document.body.classList.remove("is-loading", "is-entering", "no-burst-transition");
+    document.documentElement.style.setProperty("--burst-scale", 1);
   });
 })();
 </script>
