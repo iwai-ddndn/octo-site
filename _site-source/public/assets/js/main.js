@@ -1,5 +1,5 @@
 import { Burst } from './burst.js';
-import { Halftone } from './halftone.js';
+import { Halftone } from './halftone.js?v=covers-1';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];

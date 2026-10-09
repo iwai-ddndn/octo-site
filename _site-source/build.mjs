@@ -55,7 +55,7 @@ function layout({ base, title, desc, path, og, body, page }) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${base}assets/css/site.css">
+<link rel="stylesheet" href="${base}assets/css/site.css?v=covers-1">
 <script>
   // 遷移ワイプ/ローダーの初期状態をペイント前に決める（白フラッシュ防止）
   (function(){var d=document.documentElement;try{
@@ -63,7 +63,7 @@ function layout({ base, title, desc, path, og, body, page }) {
     else if(!sessionStorage.getItem('octo:seen')&&d.dataset.page==='home'){d.classList.add('is-loading');}
   }catch(e){} d.classList.add('js');})();
 </script>
-<script type="module" src="${base}assets/js/main.js"></script>
+<script type="module" src="${base}assets/js/main.js?v=covers-1"></script>
 </head>
 <body>
 <a class="skip" href="#main">本文へスキップ</a>
