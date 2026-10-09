@@ -496,6 +496,7 @@ html.is-loading .loader { display: block; }
 }
 
 @media (max-width: 760px) {
+  .page-title { font-size: 17vw; } /* Keep Works plus the count inside narrow screens. */
   :root { --hd: 60px; }
   .hd-nav, .hd-contact { display: none; }
   .hd-menu { display: inline-flex; grid-column: 9 / span 4; justify-self: end; text-transform: uppercase; align-items: center; gap: 8px; z-index: 2; }
