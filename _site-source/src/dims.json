@@ -1,0 +1,102 @@
+{
+"works/genba-1.webp": [
+1536,
+1024
+],
+"works/genba-2.webp": [
+1024,
+1536
+],
+"works/genba-cover.webp": [
+1536,
+1024
+],
+"works/kasane-1.webp": [
+1024,
+1536
+],
+"works/kasane-2.webp": [
+1536,
+1024
+],
+"works/kasane-cover.webp": [
+1536,
+1024
+],
+"works/kumo-1.webp": [
+1536,
+1024
+],
+"works/kumo-2.webp": [
+1024,
+1536
+],
+"works/kumo-cover.webp": [
+1536,
+1024
+],
+"works/noise-1.webp": [
+1536,
+1024
+],
+"works/noise-2.webp": [
+1024,
+1536
+],
+"works/noise-cover.webp": [
+1536,
+1024
+],
+"works/shiori-1.webp": [
+1536,
+1024
+],
+"works/shiori-2.webp": [
+1024,
+1536
+],
+"works/shiori-cover.webp": [
+1536,
+1024
+],
+"works/tidewell-1.webp": [
+1536,
+1024
+],
+"works/tidewell-2.webp": [
+1024,
+1536
+],
+"works/tidewell-cover.webp": [
+1536,
+1024
+],
+"img/og.png": [
+1200,
+630
+],
+"img/profile.jpg": [
+1200,
+1200
+],
+"img/svc-ai.webp": [
+1536,
+1024
+],
+"img/svc-graphic.webp": [
+1536,
+1024
+],
+"img/svc-uiux.webp": [
+1536,
+1024
+],
+"img/svc-web.webp": [
+1536,
+1024
+],
+"img/wordmark-print.svg": [
+2000,
+704
+]
+}

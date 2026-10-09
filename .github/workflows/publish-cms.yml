@@ -1,0 +1,59 @@
+name: Build and optionally publish CMS site
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Deploy the validated site to oc-to.com
+        type: boolean
+        default: false
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: cms-pages-release
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test publication safety without credentials
+        run: node --test .github/scripts/cms-release.test.mjs
+      - name: Build from published works only
+        run: node .github/scripts/build-cms-release.mjs
+        env:
+          MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
+          MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
+          CMS_REQUIRED_IDS: unienter,studio-holiday,graphic,hikari-wo-okuru,pool-to-jukou
+      - name: Upload validated site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site-source/public
+  deploy:
+    if: ${{ inputs.publish && github.ref == 'refs/heads/main' }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Require explicitly configured Actions publishing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mode=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .build_type)
+          test "$mode" = workflow
+      - name: Deploy validated artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
