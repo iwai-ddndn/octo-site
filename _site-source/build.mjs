@@ -191,7 +191,7 @@ const media = (img, alt, { base = '', preset = 'photo', cls = '', ratio, eager =
   if (!img) return cls === 'card-media' ? '<div class="card-media" style="background:var(--paper-2)" aria-hidden="true"></div>' : '';
   const src = img.remote ? img.src : `${base}assets/${img.src}`;
   const st = [ratio ? `--ratio:${ratio}` : '', style].filter(Boolean).join(';');
-  return `<figure class="ht ${cls}" data-preset="${preset}"${fx ? ` data-fx="${fx}"` : ''}${focus ? ` data-focus="${focus}"` : ''}${st ? ` style="${st}"` : ''}>
+  return `<figure class="ht ${cls}" data-preset="${preset}"${['card-media', 'work-cover', 'next-media'].includes(cls) ? ' data-fit="contain"' : ''}${fx ? ` data-fx="${fx}"` : ''}${focus ? ` data-focus="${focus}"` : ''}${st ? ` style="${st}"` : ''}>
     <img src="${esc(src)}" alt="${esc(alt)}"${img.w ? ` width="${img.w}" height="${img.h}"` : ''}${img.remote ? ' crossorigin="anonymous"' : ''} ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">
   </figure>`;
 };

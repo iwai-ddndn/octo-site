@@ -34,6 +34,7 @@ uniform float uPlates;
 
 vec3 srcAt(vec2 p){
   vec2 uv = clamp(p / uRes, 0.0, 1.0) * uFit.xy + uFit.zw;
+  if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return vec3(1.0);
   return texture2D(uTex, uv).rgb;
 }
 
@@ -100,6 +101,12 @@ vec3 lay(vec3 base, vec3 ink, float a){
 
 void main(){
   vec2 p = vec2(gl_FragCoord.x, uCanvasH - gl_FragCoord.y);
+
+  vec2 imageUV = p / uRes * uFit.xy + uFit.zw;
+  if (any(lessThan(imageUV, vec2(0.0))) || any(greaterThan(imageUV, vec2(1.0)))) {
+    gl_FragColor = vec4(uPaper, 1.0);
+    return;
+  }
 
   // ルーペ：中心からの距離で倍率を変え、内側ほど網点を拡大して見せる
   float dist = length(p - uLoupe.xy);
@@ -280,7 +287,11 @@ export class Halftone {
     const sw = source.naturalWidth || source.width, shh = source.naturalHeight || source.height;
     const ra = w / h, rs = sw / shh;
     let sx = 1, sy = 1;
-    if (ra > rs) sy = rs / ra; else sx = ra / rs;
+    if (p.fit === 'contain') {
+      if (ra > rs) sx = ra / rs; else sy = rs / ra;
+    } else {
+      if (ra > rs) sy = rs / ra; else sx = ra / rs;
+    }
     const fx = p.focus ? p.focus[0] : 0.5, fy = p.focus ? p.focus[1] : 0.5;
 
     const pr = PRESETS[p.preset] || p.preset;

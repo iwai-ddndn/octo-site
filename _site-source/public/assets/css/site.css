@@ -555,3 +555,7 @@ html.is-loading .loader { display: block; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
 }
+
+/* Keep complete CMS covers, including booklet edges and typography. */
+.ht[data-fit="contain"] { background: var(--paper); }
+.ht[data-fit="contain"] img { object-fit: contain; object-position: center; }

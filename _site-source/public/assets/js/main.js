@@ -252,7 +252,7 @@ class Media {
     // 速く動かされるほど網点に戻り、版がずれる。止まると解像し直す
     const ag = reduced ? 0 : this.agitate;
     this.eff = this.progress * (1 - ag * 0.92);
-    if (this.shift != null) {
+    if (this.shift != null && this.fig.dataset.fit !== 'contain') {
       const fx = clamp(0.5 + this.shift * 0.4, 0, 1);
       if (Math.abs(fx - this.focus[0]) > 0.0015) {
         this.focus[0] = fx;
@@ -282,6 +282,7 @@ class Media {
     shared.ensureSize(w, h);
     const ok = shared.render(this.img, w, h, {
       preset: this.preset,
+      fit: this.fig.dataset.fit,
       cell: cellCss * dpr * (1 + (1 - this.eff) * 0.55),
       progress: this.eff,
       focus: this.focus,
