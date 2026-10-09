@@ -22,7 +22,7 @@ function build(contents, status=200, options={}) {
       (options.networkError ? `throw new Error('private network detail');` : `return new Response(${JSON.stringify(JSON.stringify({contents,totalCount:contents.length}))}, {status:${status},headers:{'Content-Type':'application/json'}});`)+'\n};';
     writeFileSync(join(dir,'fake-api.mjs'),preload);
     const result=spawnSync(process.execPath,['--import',join(dir,'fake-api.mjs'),join(dir,'.github/scripts/build-cms-release.mjs')],{
-      encoding:'utf8',env:{PATH:process.env.PATH,MICROCMS_SERVICE_DOMAIN:'oc-to',MICROCMS_API_KEY:options.missingKey?'':'synthetic-test-only',CMS_REQUIRED_IDS:required.join(',')}
+      encoding:'utf8',env:{PATH:process.env.PATH,MICROCMS_SERVICE_DOMAIN:'oc-to',MICROCMS_API_KEY:options.missingKey?'':'synthetic-test-only',CMS_REQUIRED_IDS:(options.required || required).join(',')}
     });
     return {status:result.status,stdout:result.stdout,stderr:result.stderr,home:readFileSync(homepage,'utf8'),details:required.map(id=>{
       const p=join(dir,'_site-source/public/works',id,'index.html');return existsSync(p)?readFileSync(p,'utf8'):null;
@@ -58,4 +58,13 @@ test('covered works retain existing media rendering',()=>{
 });
 test('invalid URL slugs cannot write unexpected paths',()=>{
   const r=build([...works,{...works[0],id:'../unsafe'}]);assert.equal(r.status,1);assert.equal(r.home,'EXISTING SITE');
+});
+
+test('UniEnter-only publication generates no other work detail pages',()=>{
+  const r=build([works[0]],200,{required:['unienter']});
+  assert.equal(r.status,0,r.stderr);
+  assert.match(r.home,/works\/unienter\//);
+  for(const id of required.slice(1)) assert.ok(!r.home.includes(`works/${id}/`));
+  assert.ok(r.details[0]);
+  assert.deepEqual(r.details.slice(1),[null,null,null,null]);
 });

@@ -30,7 +30,7 @@ jobs:
         env:
           MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
           MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
-          CMS_REQUIRED_IDS: unienter,studio-holiday,graphic,hikari-wo-okuru,pool-to-jukou
+          CMS_REQUIRED_IDS: unienter
       - name: Upload validated site
         uses: actions/upload-pages-artifact@v4
         with:
