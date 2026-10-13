@@ -13,6 +13,8 @@ const DIMS = JSON.parse(readFileSync(new URL('./src/dims.json', import.meta.url)
 
 const OUT = new URL('./public/', import.meta.url).pathname;
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// CMS textareas are plain text: retain newlines without accepting markup.
+const plainText = (s) => esc(s).replace(/\r\n?|\n/g, '<br>');
 const pad = (n) => String(n).padStart(2, '0');
 // コピー用: 改行→<br>、[[語]]→網点マーカー
 const txt = (s) => esc(s).replace(/\n/g, '<br>').replace(/\[\[(.+?)\]\]/g, '<span class="hl">$1</span>');
@@ -43,6 +45,7 @@ function layout({ base, title, desc, path, og, body, page }) {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
+${process.env.CMS_PREVIEW === 'true' ? '<meta name="robots" content="noindex, nofollow">' : ''}
 <meta name="theme-color" content="#f7f6f2">
 <link rel="canonical" href="${url}">
 <meta property="og:type" content="website">
@@ -55,7 +58,7 @@ function layout({ base, title, desc, path, og, body, page }) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${base}assets/css/site.css?v=covers-1">
+<link rel="stylesheet" href="${base}assets/css/site.css?v=details-1">
 <script>
   // 遷移ワイプ/ローダーの初期状態をペイント前に決める（白フラッシュ防止）
   (function(){var d=document.documentElement;try{
@@ -63,7 +66,7 @@ function layout({ base, title, desc, path, og, body, page }) {
     else if(!sessionStorage.getItem('octo:seen')&&d.dataset.page==='home'){d.classList.add('is-loading');}
   }catch(e){} d.classList.add('js');})();
 </script>
-<script type="module" src="${base}assets/js/main.js?v=covers-1"></script>
+<script type="module" src="${base}assets/js/main.js?v=details-1"></script>
 </head>
 <body>
 <a class="skip" href="#main">本文へスキップ</a>
@@ -370,19 +373,19 @@ function workPage(w, i) {
   </header>
   ${media(w.cover, `${w.title} cover`, { base, cls: 'work-cover', eager: true, fx: 'soft' })}
   ${w.lead || w.sections.length ? `<div class="work-body">
-    <p class="label mono">( Overview )</p>
-    <p class="work-lead reveal-lines">${esc(w.lead)}</p>
+    ${w.lead ? `<p class="label mono">( Overview )</p>
+    <p class="work-lead reveal-lines">${plainText(w.lead)}</p>` : ''}
     ${w.sections
       .map((s, k) => `<section class="work-sec">
-      <h2 class="mono"><span>${pad(k + 1)}</span>${esc(s.h)}</h2>
-      <p class="reveal">${esc(s.p)}</p>
+      ${s.h ? `<h2 class="mono"><span>${pad(k + 1)}</span><span>${plainText(s.h)}</span></h2>` : ''}
+      ${s.p ? `<p class="reveal">${plainText(s.p)}</p>` : ''}
     </section>`)
       .join('\n    ')}
   </div>` : ''}
-  <div class="work-gallery">
+  ${w.gallery.length ? `<div class="work-gallery">
     ${first ? media(first, `${w.title} image 1`, { base, cls: 'g-wide', fx: 'soft' }) : ''}
     ${rest.map((g, k) => media(g, `${w.title} image ${k + 2}`, { base, cls: 'g-narrow', fx: 'soft' })).join('')}
-  </div>
+  </div>` : ''}
 </article>
 <a class="next" href="${base}works/${next.slug}/" data-theme="blue" data-cursor="Next"${next.cover ? '' : ' style="background:var(--blue)"'}>
   ${media(next.cover, '', { base, cls: 'next-media', preset: 'photoInverse' })}

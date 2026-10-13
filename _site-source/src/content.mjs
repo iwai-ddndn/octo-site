@@ -26,6 +26,8 @@ function cmsImage(img) {
 
 const lines = (v) => (Array.isArray(v) ? v : String(v || '').split(/\r?\n|,\s*/)).map((s) => s.trim()).filter(Boolean);
 const first = (v) => (Array.isArray(v) ? v[0] : v);
+// Optional plain-text fields may be absent or contain only whitespace.
+const plain = (v) => typeof v === 'string' ? v.replace(/\r\n?/g, '\n').trim() : '';
 
 function normalizeLocal(w) {
   return {
@@ -51,8 +53,8 @@ function normalizeCms(c) {
     role: lines(c.role),
     cover: cmsImage(c.cover),
     gallery: (c.gallery || []).map(cmsImage).filter(Boolean),
-    lead: c.lead || '',
-    sections: (c.sections || []).map((s) => ({ h: s.heading ?? s.h, p: s.body ?? s.p })).filter((s) => s.h || s.p),
+    lead: plain(c.lead),
+    sections: (c.sections || []).filter(Boolean).map((s) => ({ h: plain(s.heading ?? s.h), p: plain(s.body ?? s.p) })).filter((s) => s.h || s.p),
     url: c.url || '',
   };
 }

@@ -176,14 +176,20 @@ addEventListener('pageshow', (e) => { if (e.persisted) wipe.clear(); });
 $$('.reveal-lines').forEach((el) => {
   el.innerHTML = el.innerHTML
     .split(/<br\s*\/?>/i)
-    .map((l, i) => `<span class="rl"><span style="--i:${i}">${l}</span></span>`)
+    .map((l, i) => `<span class="rl"><span style="--i:${i}">${l || '<br>'}</span></span>`)
     .join('');
 });
 const io = new IntersectionObserver(
   (es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }),
   { threshold: 0.15, rootMargin: '0px 0px -6% 0px' }
 );
-pageReady.then(() => $$('.split, .reveal, .reveal-lines').forEach((el) => io.observe(el)));
+// A CMS paragraph can be taller than the viewport; it must not remain invisible
+// because 15% of the whole paragraph can never enter the screen at once.
+const workTextIo = new IntersectionObserver(
+  (es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); workTextIo.unobserve(e.target); } }),
+  { threshold: 0, rootMargin: '0px 0px -6% 0px' }
+);
+pageReady.then(() => $$('.split, .reveal, .reveal-lines').forEach((el) => (el.closest('.work-body') ? workTextIo : io).observe(el)));
 
 /* ------------------------------------------------------------------ halftone media */
 let shared = null;

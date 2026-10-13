@@ -442,6 +442,8 @@ html.js .svc-3d:not(.is-fallback) .svc-media { opacity: 0; pointer-events: none;
 .work-sec { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--g); border-top: 1px solid var(--rule); padding-top: 20px; }
 .work-sec h2 { grid-column: 1 / span 3; display: flex; gap: 18px; text-transform: uppercase; color: var(--blue); font-weight: 500; }
 .work-sec p { grid-column: 4 / span 6; font-size: 16px; line-height: 2.1; }
+.work-body > *, .work-sec > *, .work-sec h2 > span { min-width: 0; overflow-wrap: anywhere; }
+.work-sec h2 > span:first-child { flex-shrink: 0; }
 .work-gallery { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--g); row-gap: var(--g); padding: 0 var(--g); }
 .g-wide { grid-column: 1 / -1; }
 .g-narrow { grid-column: 4 / span 6; }
