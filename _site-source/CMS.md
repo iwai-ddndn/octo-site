@@ -25,7 +25,7 @@
 ID `cms-detail-dummy`、`sample=true`、`featured=false`、タイトルは「ダミー／詳細ページ表示検証」。
 `.github/fixtures/work-details/cms-entry.json` と `assets/` 内の番号付きPNG3枚が入稿見本です。
 JSON内の画像URLはローカル用。CMSではPNGを登録し、その画像URLに置き換わります。
-顧客名・年・実績・成果・公開URLは作りません。**ダミーは公開しません。**
+顧客名・年・実績・成果・公開URLは作りません。**この検証専用作品は公開しません。**
 
 ## ローカルプレビュー
 
@@ -51,6 +51,6 @@ node .github/scripts/preview-work-details.mjs /absolute/path/to/cms-editorial-ex
 ## 公開
 
 CMS編集とサイト反映は別です。既存の `publish-cms.yml` を `main / publish=true` で実行すると本番配置します。
-`publish=false` は成果物作成のみ。今回のダミー検証ではどちらも実行しません。
+`publish=false` は成果物作成のみ。検証専用JSONはこのワークフローに渡さず、本番への反映は内容の承認後に実行します。
 キーは既存GitHub Repository Secrets内に保持。`site` APIは取得しません。
 公開0件・取得失敗・`sample=true`混入・必須の`unienter`欠落時は、出力前に停止します。
