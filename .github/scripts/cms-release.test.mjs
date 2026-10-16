@@ -46,7 +46,7 @@ test('partial publication and sample contamination preserve existing output',()=
 });
 test('all five title/category-only works render without invented images or descriptions',()=>{
   const r=build(works);assert.equal(r.status,0,r.stderr);assert.notEqual(r.home,'EXISTING SITE');
-  for(const html of r.details){
+  for(const html of r.details.slice(1)){
     assert.ok(html);assert.doesNotMatch(html,/Sample project|undefined|src="null|\( Overview \)|<dt>Client<\/dt>/);
     assert.match(html,/assets\/img\/og.png/);assert.match(html,/style="background:var\(--blue\)"/);
     assert.doesNotMatch(html,/class="ht work-cover"/);
@@ -54,7 +54,7 @@ test('all five title/category-only works render without invented images or descr
 });
 test('covered works retain existing media rendering',()=>{
   const r=build(works.map(w=>({...w,cover:{url:'https://images.microcms-assets.io/assets/test.jpg',width:1200,height:800},lead:'Test overview'})));
-  assert.equal(r.status,0,r.stderr);assert.match(r.details[0],/class="ht work-cover"/);assert.match(r.details[0],/Test overview/);
+  assert.equal(r.status,0,r.stderr);assert.match(r.details[0],/class="ht work-cover"/);assert.match(r.details[1],/Test overview/);
 });
 test('invalid URL slugs cannot write unexpected paths',()=>{
   const r=build([...works,{...works[0],id:'../unsafe'}]);assert.equal(r.status,1);assert.equal(r.home,'EXISTING SITE');
@@ -70,37 +70,37 @@ test('UniEnter-only publication generates no other work detail pages',()=>{
 });
 
 test('CMS textareas preserve line and paragraph breaks and escape markup',()=>{
-  const r=build([{...works[0],lead:'DUMMY overview\r\nsecond line\n\nlast line <script>alert(1)</script>',
+  const r=build([{...works[1],lead:'DUMMY overview\r\nsecond line\n\nlast line <script>alert(1)</script>',
     sections:[{fieldId:'section',heading:'DUMMY <heading>',body:'Line one\r\nLine two\n\nLine four & text'}]
-  }],200,{required:['unienter']});
+  }],200,{required:['studio-holiday']});
   assert.equal(r.status,0,r.stderr);
-  assert.match(r.details[0],/DUMMY overview<br>second line<br><br>last line &lt;script&gt;/);
-  assert.match(r.details[0],/DUMMY &lt;heading&gt;/);
-  assert.match(r.details[0],/Line one<br>Line two<br><br>Line four &amp; text/);
-  assert.doesNotMatch(r.details[0],/<script>alert\(1\)/);
+  assert.match(r.details[1],/DUMMY overview<br>second line<br><br>last line &lt;script&gt;/);
+  assert.match(r.details[1],/DUMMY &lt;heading&gt;/);
+  assert.match(r.details[1],/Line one<br>Line two<br><br>Line four &amp; text/);
+  assert.doesNotMatch(r.details[1],/<script>alert\(1\)/);
 });
 
 test('empty optional fields omit sections, lead and gallery without undefined content',()=>{
-  const r=build([{...works[0],lead:' \n ',gallery:[],sections:[null,{}, {heading:'  ',body:'\r\n'}]}],200,{required:['unienter']});
+  const r=build([{...works[1],lead:' \n ',gallery:[],sections:[null,{}, {heading:'  ',body:'\r\n'}]}],200,{required:['studio-holiday']});
   assert.equal(r.status,0,r.stderr);
-  assert.doesNotMatch(r.details[0],/class="work-body"|class="work-gallery"|undefined/);
+  assert.doesNotMatch(r.details[1],/class="work-body"|class="work-gallery"|undefined/);
 });
 
 test('partial sections allow either heading or body and retain long text',()=>{
   const long='DUMMY_LONG_TEXT_'.repeat(200);
-  const r=build([{...works[0],sections:[{fieldId:'section',body:long},{fieldId:'section',heading:'DUMMY heading only'}]}],200,{required:['unienter']});
+  const r=build([{...works[1],sections:[{fieldId:'section',body:long},{fieldId:'section',heading:'DUMMY heading only'}]}],200,{required:['studio-holiday']});
   assert.equal(r.status,0,r.stderr);
-  assert.ok(r.details[0].includes(long));
-  assert.match(r.details[0],/DUMMY heading only/);
-  assert.doesNotMatch(r.details[0],/undefined|class="work-lead|\( Overview \)/);
-  assert.equal((r.details[0].match(/class="work-sec"/g)||[]).length,2);
+  assert.ok(r.details[1].includes(long));
+  assert.match(r.details[1],/DUMMY heading only/);
+  assert.doesNotMatch(r.details[1],/undefined|class="work-lead|\( Overview \)/);
+  assert.equal((r.details[1].match(/class="work-sec"/g)||[]).length,2);
 });
 
 test('multiple CMS gallery images retain order, dimensions and existing layout',()=>{
   const gallery=[{url:'https://images.microcms-assets.io/assets/dummy-01.png',width:1200,height:675},{url:'https://images.microcms-assets.io/assets/dummy-02.png',width:900,height:900},{url:'https://images.microcms-assets.io/assets/dummy-03.png',width:750,height:1000}];
-  const r=build([{...works[0],gallery}],200,{required:['unienter']});
+  const r=build([{...works[1],gallery}],200,{required:['studio-holiday']});
   assert.equal(r.status,0,r.stderr);
-  const html=r.details[0];
+  const html=r.details[1];
   assert.ok(html.indexOf('dummy-01.png')<html.indexOf('dummy-02.png'));
   assert.ok(html.indexOf('dummy-02.png')<html.indexOf('dummy-03.png'));
   assert.equal((html.match(/class="ht g-wide"/g)||[]).length,1);
@@ -144,3 +144,15 @@ test('preview refuses unlabelled records and slug overrides before writing outpu
     }
   } finally {rmSync(dir,{recursive:true,force:true});}
 });
+
+ test('UniEnter editorial content replaces placeholders only on its detail page',()=>{
+  const r=build([{...works[0],title:'UniEnter',sections:[{heading:'作品について（ダミー）',body:'これは仮ものです'}]}, works[1]],200,{required:['unienter']});
+  assert.equal(r.status,0,r.stderr);
+  assert.match(r.details[0],/Enterでのうっかり送信を防ぐ/);
+  assert.match(r.details[0],/official-site-20261016.png/);
+  assert.match(r.details[0],/<video controls playsinline preload="metadata"/);
+  assert.match(r.details[0],/https:\/\/unienter.oc-to.com\//);
+  assert.doesNotMatch(r.details[0],/ダミー|仮もの|autoplay/);
+  assert.doesNotMatch(r.details[1],/unienter-media|teaser-16x9/);
+  assert.doesNotMatch(r.home,/<video|official-site-20261016/);
+ });

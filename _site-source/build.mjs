@@ -2,6 +2,7 @@
 // コンテンツは src/content.mjs が「ローカル / microCMS / モック」から読み込む（CMS.md 参照）
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { loadContent, assertPublishable } from './src/content.mjs';
+import { unienterDetail, unienterMedia } from './src/unienter-detail.mjs';
 
 const content = await loadContent();
 // Check before any output writes. Local design previews remain available.
@@ -354,6 +355,7 @@ function worksIndex() {
 
 // ---------- Work detail ----------
 function workPage(w, i) {
+  w = unienterDetail(w);
   const base = '../../';
   const next = works[(i + 1) % works.length];
   const [first, ...rest] = w.gallery;
@@ -382,6 +384,7 @@ function workPage(w, i) {
     </section>`)
       .join('\n    ')}
   </div>` : ''}
+  ${w.slug === 'unienter' ? unienterMedia : ''}
   ${w.gallery.length ? `<div class="work-gallery">
     ${first ? media(first, `${w.title} image 1`, { base, cls: 'g-wide', fx: 'soft' }) : ''}
     ${rest.map((g, k) => media(g, `${w.title} image ${k + 2}`, { base, cls: 'g-narrow', fx: 'soft' })).join('')}

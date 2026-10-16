@@ -561,3 +561,15 @@ html.is-loading .loader { display: block; }
 /* Keep complete CMS covers, including booklet edges and typography. */
 .ht[data-fit="contain"] { background: var(--paper); }
 .ht[data-fit="contain"] img { object-fit: contain; object-position: center; }
+
+/* UniEnter case study: native media, scoped to this detail page. */
+.unienter-media { padding: 0 var(--g) clamp(80px, 10vw, 160px); max-width: 1440px; margin: auto; }
+.unienter-media-head { border-top: 1px solid var(--rule); padding-top: 24px; margin-bottom: 28px; }
+.unienter-media-head h2 { margin-top: 16px; font-size: clamp(22px, 3vw, 40px); line-height: 1.5; color: var(--blue); }
+.unienter-media figure { margin: 0 0 clamp(56px, 7vw, 100px); }
+.unienter-media img, .unienter-media video { display: block; width: 100%; max-width: 100%; height: auto; border: 1px solid var(--rule); }
+.unienter-media video { aspect-ratio: 16 / 9; background: #171717; }
+.unienter-media figcaption, .unienter-film-summary { font-size: 13px; line-height: 1.9; margin-top: 12px; }
+.unienter-site-link { display: flex; justify-content: space-between; gap: 24px; padding: 24px 0; border-top: 1px solid var(--blue); border-bottom: 1px solid var(--blue); color: var(--blue); font-size: clamp(18px, 2vw, 28px); }
+.unienter-site-link:hover { opacity: .65; }
+.unienter-media a:focus-visible { outline: 2px solid var(--blue); outline-offset: 6px; }
