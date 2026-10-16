@@ -6,24 +6,40 @@ export function unienterDetail(work) {
     ...work,
     subtitle: 'Enterでのうっかり送信を防ぐ',
     url: 'https://unienter.oc-to.com/',
-    lead: '改行したかっただけなのに、書きかけの言葉を送ってしまう。UniEnterは、そんな小さなつまずきを減らすために生まれたMacアプリです。対象のチャットアプリでEnterを改行、⌘Enterを送信に揃え、伝えたいことを書き終えてから送れる体験をつくりました。',
+    lead: 'Enterで改行し、⌘Enterで送信する。UniEnterは、対象のチャットアプリでキー操作を揃え、書き終えてから送れる体験をつくるMacアプリです。',
     sections: [
-      { h: '書くことに集中できる操作へ', p: '仕事のチャットからAIへの相談まで、一日の中で複数の入力欄を行き来します。そのたびに送信の操作を意識し直す負担を減らすことが、制作の出発点でした。\n\nUniEnterはメニューバーに常駐し、選択した対象アプリでキーの働きを整えます。文章を途中で区切り、読み返し、必要なことを付け足す。いつもの入力の流れを保ちながら、最後の⌘Enterを送信の合図にします。' },
-      { h: '使う場所を、自分で選ぶ', p: '設定画面では、利用するサービスを選んで有効にできます。アプリ版とブラウザ版は別々に設定できるため、日々の使い方に合わせて対象を調整できます。初回の案内からアクセシビリティの許可、対象アプリの選択へと進める構成にしました。\n\nSlack、Microsoft Teams、LINE、ChatGPT、Claudeなどが対象です。サービスによってアプリ版・Web版の対応範囲が異なり、アプリ側の送信設定にも注意が必要です。最新の対応一覧と使い方は公式サイトにまとめています。' },
-      { h: '日本語入力と、普段の操作への配慮', p: '実装では、前面のアプリやブラウザのタブを判定し、対象となる場面でキー入力を扱います。日本語の変換を確定するEnterと、文章を改行するEnterを区別することを重視し、変換中と判断した入力は書き換えない設計です。\n\nアプリ本体はSwiftとAppKit、設定や初回案内のUIはSwiftUIで構成。入力した文章を記録・保存・送信することなく、Mac上でキー操作を処理します。' },
-      { h: '触って理解できる紹介サイト', p: '公式サイトでは、Enterと⌘Enterの違いをチャット形式のデモで体験できます。機能の説明だけでなく、使う前と使った後の変化が伝わるよう、入力、改行、送信の動きを中心に構成しました。\n\n対応サービス、導入手順、価格へと読み進められる流れを用意し、ティザー動画でも「うっかり送信」から「書き終えて送信」への変化を短いストーリーで紹介しています。' },
-      { h: '公開情報', p: 'macOS 13以降に対応。14日間の無料トライアル後は、1,480円の買い切りで利用できます。公開版はv0.3.7（2026年10月16日時点）。最新のバージョン、価格、対応範囲は公式サイトでご確認ください。' },
+      { h: '操作を、そのままビジュアルに', p: '公式サイトは、入力・改行・送信を試せるチャットデモを中心に設計。大きなタイポグラフィとキーの動きで使い方を伝え、導入前後の違いから、プライバシー、設定、価格へと読み進める構成にしました。' },
+      { h: '日々の入力に寄り添う', p: 'アプリ版とWeb版の対象を個別に選択でき、日本語の変換中と判断したEnterは書き換えない設計です。Swift・AppKitとSwiftUIで実装し、入力した文章は記録・保存・送信しません。macOS 13以降、14日間無料、1,480円の買い切り。最新の対応範囲と公開情報は公式サイトへ。' },
     ],
     gallery: [],
   };
 }
 export const unienterMedia = `
 <section class="unienter-media" aria-label="UniEnterの公式サイトと紹介動画">
-  <div class="unienter-media-head"><p class="label mono">( Website )</p><h2>操作の違いを、サイトで体験する。</h2></div>
+  <div class="unienter-media-head"><p class="label mono">( Website design )</p><h2>入力の体験を、画面で伝える。</h2></div>
+  <div class="unienter-screens">
   <figure>
-    <a href="https://unienter.oc-to.com/" target="_blank" rel="noopener"><img src="../../assets/works/unienter/official-site-20261016.png" alt="UniEnter公式サイト。Enterでのうっかり送信を防ぐという見出しと、入力を試せるチャットデモ" width="1440" height="1000" loading="lazy" decoding="async"></a>
-    <figcaption>公式サイトの実画面（2026年10月16日撮影）</figcaption>
+    <a href="../../assets/works/unienter/web-01-hero.png" target="_blank" rel="noopener" aria-label="大きな見出しとチャットデモを配置したUniEnter公式サイトのファーストビューを拡大"><img src="../../assets/works/unienter/web-01-hero.png" alt="大きな見出しとチャットデモを配置したUniEnter公式サイトのファーストビュー" width="2880" height="2000" loading="lazy" decoding="async"></a>
+    <figcaption>01 / First view</figcaption>
   </figure>
+  <figure>
+    <a href="../../assets/works/unienter/web-02-experience.png" target="_blank" rel="noopener" aria-label="Enterの操作による送信体験の違いを見せる公式サイトのデモ画面を拡大"><img src="../../assets/works/unienter/web-02-experience.png" alt="Enterの操作による送信体験の違いを見せる公式サイトのデモ画面" width="2880" height="2000" loading="lazy" decoding="async"></a>
+    <figcaption>02 / Before & after</figcaption>
+  </figure>
+  <figure>
+    <a href="../../assets/works/unienter/web-03-privacy.png" target="_blank" rel="noopener" aria-label="Mac内で入力を処理することを図解したプライバシーセクションを拡大"><img src="../../assets/works/unienter/web-03-privacy.png" alt="Mac内で入力を処理することを図解したプライバシーセクション" width="2880" height="2020" loading="lazy" decoding="async"></a>
+    <figcaption>03 / Privacy</figcaption>
+  </figure>
+  <figure>
+    <a href="../../assets/works/unienter/web-04-install.png" target="_blank" rel="noopener" aria-label="導入手順と実際のアプリ設定画面を組み合わせたセクションを拡大"><img src="../../assets/works/unienter/web-04-install.png" alt="導入手順と実際のアプリ設定画面を組み合わせたセクション" width="2880" height="2610" loading="lazy" decoding="async"></a>
+    <figcaption>04 / Getting started</figcaption>
+  </figure>
+  <figure>
+    <a href="../../assets/works/unienter/web-05-pricing.png" target="_blank" rel="noopener" aria-label="無料トライアルと買い切り価格を整理した料金セクションを拡大"><img src="../../assets/works/unienter/web-05-pricing.png" alt="無料トライアルと買い切り価格を整理した料金セクション" width="2880" height="1736" loading="lazy" decoding="async"></a>
+    <figcaption>05 / Pricing</figcaption>
+  </figure>
+  </div>
+  <p class="unienter-capture-note">公式サイトの実画面 / 2026.10.16 — 画像を選択すると拡大できます。</p>
   <div class="unienter-media-head"><p class="label mono">( Film )</p><h2>うっかり送信から、書き終えて送信へ。</h2></div>
   <figure>
     <video controls playsinline preload="metadata" width="1920" height="1080" poster="../../assets/works/unienter/teaser-poster.png" aria-label="UniEnter紹介ティザー（約20秒、音声付き）">
@@ -31,7 +47,6 @@ export const unienterMedia = `
       <a href="../../assets/works/unienter/teaser-16x9.mp4">紹介動画を開く</a>
     </video>
     <figcaption>紹介ティザー / 約20秒・音声付き。再生ボタンで視聴できます。</figcaption>
-    <p class="unienter-film-summary">書きかけのメッセージを送ってしまう場面から、Enterで改行し、⌘Enterで送信する場面へ。操作の変化を紹介します。</p>
   </figure>
   <a class="unienter-site-link" href="https://unienter.oc-to.com/" target="_blank" rel="noopener">UniEnterの公式サイトを見る <span aria-hidden="true">↗</span></a>
 </section>`;

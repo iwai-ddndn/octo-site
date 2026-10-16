@@ -149,10 +149,10 @@ test('preview refuses unlabelled records and slug overrides before writing outpu
   const r=build([{...works[0],title:'UniEnter',sections:[{heading:'作品について（ダミー）',body:'これは仮ものです'}]}, works[1]],200,{required:['unienter']});
   assert.equal(r.status,0,r.stderr);
   assert.match(r.details[0],/Enterでのうっかり送信を防ぐ/);
-  assert.match(r.details[0],/official-site-20261016.png/);
+  assert.match(r.details[0],/web-01-hero.png/);
   assert.match(r.details[0],/<video controls playsinline preload="metadata"/);
   assert.match(r.details[0],/https:\/\/unienter.oc-to.com\//);
   assert.doesNotMatch(r.details[0],/ダミー|仮もの|autoplay/);
   assert.doesNotMatch(r.details[1],/unienter-media|teaser-16x9/);
-  assert.doesNotMatch(r.home,/<video|official-site-20261016/);
+  assert.doesNotMatch(r.home,/<video|web-01-hero/);
  });

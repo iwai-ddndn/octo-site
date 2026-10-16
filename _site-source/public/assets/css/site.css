@@ -573,3 +573,7 @@ html.is-loading .loader { display: block; }
 .unienter-site-link { display: flex; justify-content: space-between; gap: 24px; padding: 24px 0; border-top: 1px solid var(--blue); border-bottom: 1px solid var(--blue); color: var(--blue); font-size: clamp(18px, 2vw, 28px); }
 .unienter-site-link:hover { opacity: .65; }
 .unienter-media a:focus-visible { outline: 2px solid var(--blue); outline-offset: 6px; }
+
+.unienter-screens figure { margin-bottom: clamp(32px, 4vw, 64px); }
+.unienter-screens a { display: block; cursor: zoom-in; }
+.unienter-capture-note { font-size: 12px; line-height: 1.8; margin: 0 0 clamp(56px, 7vw, 100px); }
