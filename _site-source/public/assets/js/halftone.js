@@ -153,7 +153,7 @@ const hex = (h) => {
 
 export const INKS = {
   paper: '#f7f6f2',
-  blue: '#2962ff',
+  blue: '#ff4d00',
   cyan: '#00b4ff',
   magenta: '#ff2d8a',
   yellow: '#ffe600',
@@ -163,6 +163,11 @@ export const INKS = {
 };
 
 export const PRESETS = {
+  serviceOrange: {
+    src: 0, comp: 0, plates: 4,
+    paper: INKS.paper, inks: ['#ffb000', '#ff4d00', '#ffcf80', '#4a2618'],
+    angles: [15,75,0,45], gain: [1,1,1,1],
+  },
   // 写真：CMYKのカラーハーフトーン
   photo: {
     src: 0, comp: 0, plates: 4,
@@ -172,19 +177,19 @@ export const PRESETS = {
   // ブランド：青+シアンの2色刷り（紙）
   brand: {
     src: 1, comp: 0, plates: 2,
-    paper: INKS.paper, inks: [INKS.blue, INKS.cyan, INKS.magenta, INKS.black],
+    paper: INKS.paper, inks: [INKS.blue, '#ffb000', INKS.magenta, INKS.black],
     angles: [45, 15, 75, 0], gain: [1, 1, 1, 1],
   },
   // 青地に白インク（反転セクション）
   brandInverse: {
     src: 1, comp: 1, plates: 2,
-    paper: INKS.blue, inks: ['#ffffff', '#00c2ff', INKS.white, INKS.white],
+    paper: INKS.blue, inks: ['#ffffff', '#ffb000', INKS.white, INKS.white],
     angles: [45, 15, 75, 0], gain: [1, 1, 1, 1],
   },
   // 写真：青地に白インクのデュオトーン
   photoInverse: {
     src: 3, comp: 1, plates: 2,
-    paper: INKS.blue, inks: ['#ffffff', '#00c2ff', INKS.white, INKS.white],
+    paper: INKS.blue, inks: ['#ffffff', '#ffb000', INKS.white, INKS.white],
     angles: [45, 15, 0, 0], gain: [1, 1, 0, 0],
   },
   // 線画：紙に青インク

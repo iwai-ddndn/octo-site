@@ -55,11 +55,11 @@ ${process.env.CMS_PREVIEW === 'true' ? '<meta name="robots" content="noindex, no
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${/^https?:/.test(og) ? og : `${site.url}/${og}`}">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="${base}assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="${base}assets/img/favicon.svg?v=orange-dots-20261026" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${base}assets/css/site.css?v=details-1">
+<link rel="stylesheet" href="${base}assets/css/site.css?v=orange-dots-20261026">
 <script>
   // 遷移ワイプ/ローダーの初期状態をペイント前に決める（白フラッシュ防止）
   (function(){var d=document.documentElement;try{
@@ -67,7 +67,7 @@ ${process.env.CMS_PREVIEW === 'true' ? '<meta name="robots" content="noindex, no
     else if(!sessionStorage.getItem('octo:seen')&&d.dataset.page==='home'){d.classList.add('is-loading');}
   }catch(e){} d.classList.add('js');})();
 </script>
-<script type="module" src="${base}assets/js/main.js?v=details-1"></script>
+<script type="module" src="${base}assets/js/main.js?v=orange-dots-20261026"></script>
 </head>
 <body>
 <a class="skip" href="#main">本文へスキップ</a>
@@ -288,13 +288,13 @@ function home() {
           <h3 class="svc-title">${esc(s.title)}</h3>
           <p class="svc-body">${esc(s.body)}</p>
         </div>
-        <div class="svc-3d svc-3d-inline" data-scene="${s.key}">${media(asset(`img/${s.img}`), s.title, { base, cls: 'svc-media', ratio: '3/2' })}</div>
+        <div class="svc-3d svc-3d-inline" data-scene="${s.key}">${media(asset(`img/${s.img}`), s.title, { base, cls: 'svc-media', ratio: '3/2', preset: 'serviceOrange' })}</div>
       </li>`
         )
         .join('\n      ')}
     </ol>
     <div class="svc-stage" aria-hidden="true">
-      ${services.map((s, i) => `<div class="svc-3d svc-3d-stage${i ? '' : ' is-active'}" data-scene="${s.key}">${media(asset(`img/${s.img}`), '', { base, cls: 'svc-media', ratio: '3/2' })}</div>`).join('')}
+      ${services.map((s, i) => `<div class="svc-3d svc-3d-stage${i ? '' : ' is-active'}" data-scene="${s.key}">${media(asset(`img/${s.img}`), '', { base, cls: 'svc-media', ratio: '3/2', preset: 'serviceOrange' })}</div>`).join('')}
       <p class="svc-stage-cap mono"><b data-svc-no>01</b><span>/ ${pad(services.length)}</span><span class="svc-stage-name" data-svc-name>${esc(services[0].title)}</span></p>
       <p class="svc-stage-bar"><i data-svc-bar></i></p>
     </div>

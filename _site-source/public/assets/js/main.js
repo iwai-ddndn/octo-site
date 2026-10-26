@@ -1,5 +1,5 @@
 import { Burst } from './burst.js';
-import { Halftone } from './halftone.js?v=covers-1';
+import { Halftone } from './halftone.js?v=orange-dots-20261026';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -10,7 +10,7 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
-const BLUE = '#2962ff';
+const BLUE = '#ff4d00';
 const pad = (n) => String(n).padStart(2, '0');
 
 /* ------------------------------------------------------------------ ticker */
@@ -221,7 +221,7 @@ class Media {
     else this.img.addEventListener('load', onload, { once: true });
 
     const host = fig.closest('a, .about-grid') || fig;
-    this.canRest = this.preset === 'photo';
+    this.canRest = this.preset === 'photo' || this.preset === 'serviceOrange';
     if (finePointer) {
       host.addEventListener('pointerenter', (e) => {
         this.hover = true; this.move(e);
@@ -386,7 +386,7 @@ if (svc3d.length && shared) {
   const lio = new IntersectionObserver((es) => {
     if (!es.some((e) => e.isIntersecting)) return;
     lio.disconnect();
-    import('./svc3d.js').then((m) => m.init(svc3d)).catch((e) => {
+    import('./svc3d.js?v=orange-dots-20261026').then((m) => m.init(svc3d)).catch((e) => {
       console.warn('[svc3d] fallback to images', e);
       svc3d.forEach((el) => el.classList.add('is-fallback'));
     });

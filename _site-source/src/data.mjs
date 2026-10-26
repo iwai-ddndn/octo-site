@@ -29,19 +29,19 @@ export const copy = {
 
 export const services = [
   {
-    key: 'web', no: '01', title: 'Web Design', img: 'svc-web.webp',
+    key: 'web', no: '01', title: 'Web Design', img: 'svc-web-orange.png',
     body: '1枚のLPから複雑なコーポレートサイトまで。STUDIOでの実装も請け負います。',
   },
   {
-    key: 'uiux', no: '02', title: 'UI/UX Design', img: 'svc-uiux.webp',
+    key: 'uiux', no: '02', title: 'UI/UX Design', img: 'svc-uiux-orange.png',
     body: '複雑で曖昧な領域を画面デザインまで落とし込みます。ビジョンやシナリオから、画面デザインとデザインガイドラインまで。0→1の開発も、既存プロダクトの改善も。2B領域が専門ですが、2C領域も受け入れていますのでご相談ください。',
   },
   {
-    key: 'graphic', no: '03', title: 'Graphic Design', img: 'svc-graphic.webp',
+    key: 'graphic', no: '03', title: 'Graphic Design', img: 'svc-graphic-orange.png',
     body: 'ロゴ、チラシ、冊子、名刺など、必要なデザインを一括で制作します。入稿までサポートしますので、初めての方もご安心ください。',
   },
   {
-    key: 'ai', no: '04', title: 'AI Creative', img: 'svc-ai.webp',
+    key: 'ai', no: '04', title: 'AI Creative', img: 'svc-ai-orange.png',
     body: 'ChatGPT/Gemini/Claudeを利用したアウトプットの作成・活用サポートを承ります。AIで作成したWeb・アプリ・UI・グラフィックの修正依頼も受け付けております。',
   },
 ];

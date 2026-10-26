@@ -98,5 +98,9 @@
 "img/wordmark-print.svg": [
 2000,
 704
-]
+],
+"img/svc-web-orange.png": [1536, 1024],
+"img/svc-uiux-orange.png": [1536, 1024],
+"img/svc-graphic-orange.png": [1536, 1024],
+"img/svc-ai-orange.png": [1536, 1024]
 }

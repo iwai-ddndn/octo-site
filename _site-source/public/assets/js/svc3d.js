@@ -11,13 +11,8 @@ import { RoundedBoxGeometry } from '../vendor/three/RoundedBoxGeometry.js';
 import { RoomEnvironment } from '../vendor/three/RoomEnvironment.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-// 表現スタイル（比較検討用に ?svc=plain|shade|edge|both で切替）
-// 既定 edge = 落ち影はカラーハーフトーン＋中の要素だけ輪郭線、本体は柔らかい3Dのまま。
-// shade（立体の陰を網点化）は縁にノイズ状に出て刷りに見えず、立体感も失うため不採用（比較用に残す）
-const STYLE = (() => {
-  const v = new URLSearchParams(location.search).get('svc') || 'edge';
-  return { shade: v === 'shade' || v === 'both', edge: v === 'edge' || v === 'both', cmyShadow: v !== 'plain' };
-})();
+// Physical surface shading only; legacy halftone/outline modes removed.
+const STYLE = { shade: false, edge: false, cmyShadow: false };
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const ease = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));                 // expo out
@@ -28,13 +23,13 @@ const TAU = Math.PI * 2;
 const MAT = {
   paper: new THREE.MeshPhysicalMaterial({ color: '#f3f0e9', roughness: 0.72, sheen: 0.5, sheenRoughness: 0.7, sheenColor: new THREE.Color('#ffffff') }),
   white: new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.5, clearcoat: 0.2, clearcoatRoughness: 0.5 }),
-  blue: new THREE.MeshPhysicalMaterial({ color: '#2962ff', roughness: 0.42, clearcoat: 0.25, clearcoatRoughness: 0.35, envMapIntensity: 0.45 }),
+  blue: new THREE.MeshPhysicalMaterial({ color: '#ff4d00', roughness: 0.42, clearcoat: 0.25, clearcoatRoughness: 0.35, envMapIntensity: 0.45 }),
 };
 // 画面内のUI・紙面の上の要素（輪郭線を付ける“中の要素”）
 MAT.paperIn = MAT.paper.clone();
 MAT.whiteIn = MAT.white.clone();
 const INNER = new Set([MAT.blue, MAT.paperIn, MAT.whiteIn]);
-const INK = { blue: new THREE.Color('#2962ff'), cyan: new THREE.Color('#00b4ff'), navy: new THREE.Color('#0a1e6e') };
+const INK = { blue: new THREE.Color('#ff4d00'), cyan: new THREE.Color('#ffb000'), navy: new THREE.Color('#54230c') };
 
 /* ---------------------------------------------------------------- geometry kit */
 const geoCache = new Map();
@@ -61,7 +56,7 @@ function slabGeo(w, h, d, r) {
   geoCache.set(k, g);
   return g;
 }
-const mesh = (geo, mat) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; return m; };
+const mesh = (geo, mat) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = false; return m; };
 const slab = (w, h, d, r, mat) => mesh(slabGeo(w, h, d, r), mat);
 const pill = (w, h, d, mat) => slab(w, h, d, h / 2, mat);
 // 円板は面を +Z に向けた形でジオメトリ側を回す（put() が rotation を上書きするため）
@@ -142,7 +137,7 @@ function web() {
   // キーボード（1粒ずつ）
   const keyGeo = new RoundedBoxGeometry(0.19, 0.05, 0.19, 2, 0.035);
   const cols = 14, rows = 5, keys = new THREE.InstancedMesh(keyGeo, MAT.blue, cols * rows + 1);
-  keys.castShadow = true; keys.receiveShadow = true;
+  keys.castShadow = true; keys.receiveShadow = false;
   const m4 = new THREE.Matrix4();
   let n = 0;
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
@@ -439,79 +434,38 @@ function ai() {
 
 const BUILDERS = { web, uiux, graphic, ai };
 
-/* ---------------------------------------------------------------- print look */
-// 網点1粒の被覆率（スクリーン座標・角度a・セルcell・濃度s）
-const HT_GLSL = `
-float htDot(vec2 p, float a, float cell, float s) {
-  vec2 q = mat2(cos(a), -sin(a), sin(a), cos(a)) * p;
-  vec2 c = (floor(q / cell) + 0.5) * cell;
-  float r = sqrt(clamp(s, 0.0, 1.0)) * cell * 0.7071;
-  return smoothstep(r + 0.8, r - 0.8, length(q - c)) * step(0.01, s);
-}`;
-// 立体の陰を網点で刷る: なめらかな陰影を平らにし、暗い分だけ「青45°＋シアン15°」の2版の網点を重ねる
-function printShade(mat, inkA, inkB, cell) {
-  const base = mat.color.clone().convertLinearToSRGB();
-  mat.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, {
-      uCell: { value: cell }, uBase: { value: new THREE.Vector3(base.r, base.g, base.b) },
-      uInkA: { value: new THREE.Vector3(inkA.r, inkA.g, inkA.b) }, uInkB: { value: new THREE.Vector3(inkB.r, inkB.g, inkB.b) },
-    });
-    sh.fragmentShader = sh.fragmentShader
-      .replace('void main() {', `uniform float uCell; uniform vec3 uBase, uInkA, uInkB;\n${HT_GLSL}\nvoid main() {`)
-      .replace('#include <dithering_fragment>', `#include <dithering_fragment>
-        {
-          const vec3 W = vec3(0.299, 0.587, 0.114);
-          float s = smoothstep(0.03, 0.5, 1.0 - dot(gl_FragColor.rgb, W) / dot(uBase, W)) * 0.75;
-          vec3 col = mix(gl_FragColor.rgb, uBase, 0.72);             // 陰影を平らに（少しだけ立体感を残す）
-          col *= mix(vec3(1.0), uInkA, htDot(gl_FragCoord.xy, 0.7854, uCell, s));
-          col *= mix(vec3(1.0), uInkB, htDot(gl_FragCoord.xy + vec2(2.4, -1.6), 0.2618, uCell, s * 0.6)); // 版ずれ
-          gl_FragColor.rgb = col;
-        }`);
-  };
-  mat.needsUpdate = true;
-}
-// 中の要素の輪郭線（法線方向に膨らませた裏面ハル＝スミ版のキーライン）
-function outlineMaterial(t) {
-  const m = new THREE.MeshBasicMaterial({ color: INK.navy, side: THREE.BackSide, toneMapped: false });
-  m.onBeforeCompile = (sh) => {
-    sh.uniforms.uT = { value: t };
-    sh.vertexShader = sh.vertexShader
-      .replace('void main() {', 'uniform float uT;\nvoid main() {')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed += normalize(normal) * uT;');
-  };
-  return m;
-}
-function addOutlines(root, t) {
-  const mat = outlineMaterial(t), targets = [];
-  root.traverse((o) => { if (o.isMesh && INNER.has(o.material)) targets.push(o); });
-  for (const o of targets) {
-    const h = o.isInstancedMesh ? new THREE.InstancedMesh(o.geometry, mat, o.count) : new THREE.Mesh(o.geometry, mat);
-    if (o.isInstancedMesh) h.instanceMatrix.copy(o.instanceMatrix);
-    h.castShadow = false; h.receiveShadow = false;
-    o.add(h);
-  }
-}
-
-/* ---------------------------------------------------------------- halftone shadow */
-// 落ち影を網点で刷る（45°スクリーン、影の濃さ＝点の大きさ）
-function halftoneShadowMaterial(cell) {
-  const m = new THREE.ShadowMaterial({ color: '#08196e', opacity: 0.85 });
-  m.onBeforeCompile = (sh) => {
-    sh.uniforms.uCell = { value: cell };
-    sh.uniforms.uCyan = { value: new THREE.Vector3(INK.cyan.r, INK.cyan.g, INK.cyan.b) };
-    sh.uniforms.uCmy = { value: STYLE.cmyShadow ? 1 : 0 };
-    sh.fragmentShader = sh.fragmentShader
-      .replace('void main() {', `uniform float uCell, uCmy; uniform vec3 uCyan;\n${HT_GLSL}\nvoid main() {`)
+// Model-shaped projected coverage with a constant-size world-anchored dot fill.
+// Coverage changes opacity only: never dot position, radius, or spacing.
+function projectedDotShadowMaterial() {
+  const m = new THREE.ShadowMaterial({ color: '#ffad85', opacity: 0.58 });
+  m.depthWrite = false;
+  m.depthTest = true;
+  m.toneMapped = false;
+  m.onBeforeCompile = (shader) => {
+    shader.uniforms.uDotPitch = { value: 0.22 };
+    shader.uniforms.uDotRadius = { value: 0.16 };
+    shader.vertexShader = shader.vertexShader
+      .replace('void main() {', 'varying vec2 vGroundXZ;\nvoid main() {')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvGroundXZ = (modelMatrix * vec4(transformed, 1.0)).xz;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('void main() {', `varying vec2 vGroundXZ; uniform float uDotPitch, uDotRadius;
+        void main() {`)
       .replace('gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) );', `
-        float s = clamp(1.0 - getShadowMask(), 0.0, 1.0);
-        float a = htDot(gl_FragCoord.xy, 0.7854, uCell, s * 0.45);
-        float b = uCmy > 0.5 ? htDot(gl_FragCoord.xy + vec2(3.0, -2.0), 0.2618, uCell, s * 0.42) : 0.0;
-        // 濃紺の版の下にシアンの版がずれて覗く
-        gl_FragColor = vec4( mix(uCyan, color, a), max(a * opacity, b * 0.85) );`);
+        vec2 grid = mat2(0.70710678, -0.70710678, 0.70710678, 0.70710678) * vGroundXZ / uDotPitch;
+        // Staggered diagonal lattice, with fixed circle radius like the reference.
+        float row = floor(grid.y);
+        vec2 cell = vec2(fract(grid.x - mod(row, 2.0) * 0.5), fract(grid.y)) - 0.5;
+        float d = length(cell);
+        float aa = max(0.0001, 0.65 * length(vec2(dFdx(grid.x), dFdy(grid.y))));
+        float dotFill = 1.0 - smoothstep(uDotRadius - aa, uDotRadius + aa, d);
+        float footprint = max(length(dFdx(grid)), length(dFdy(grid)));
+        dotFill = mix(dotFill, 3.14159265 * uDotRadius * uDotRadius, smoothstep(0.3, 0.65, footprint));
+        float coverage = clamp(1.0 - getShadowMask(), 0.0, 1.0);
+        gl_FragColor = vec4(color, opacity * coverage * dotFill);`);
   };
+  m.customProgramCacheKey = () => 'octo-world-dots-v5';
   return m;
 }
-
 /* ---------------------------------------------------------------- stage */
 class Spring {
   constructor(k = 90, c = 14) { this.k = k; this.c = c; this.x = 0; this.v = 0; this.t = 0; }
@@ -525,6 +479,7 @@ class Mini {
     this.dpr = Math.min(devicePixelRatio || 1, 2);
     r.setPixelRatio(this.dpr);
     r.shadowMap.enabled = true;
+    r.shadowMap.autoUpdate = true;
     r.shadowMap.type = THREE.PCFSoftShadowMap;
     r.outputColorSpace = THREE.SRGBColorSpace;
     r.toneMapping = THREE.NeutralToneMapping; // ACESはコバルトの彩度が落ちる
@@ -537,7 +492,7 @@ class Mini {
     const pmrem = new THREE.PMREMGenerator(r);
     s.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     s.environmentIntensity = 0.55;
-    s.add(new THREE.HemisphereLight('#ffffff', '#2f62ff', 0.7)); // 下からの照り返しは青
+    s.add(new THREE.HemisphereLight('#ffffff', '#ff6a24', 0.7)); // 下からの照り返しは青
     const key = new THREE.DirectionalLight('#fff8ee', 2.3);
     key.position.set(-4.5, 9, 6);
     key.castShadow = true;
@@ -545,18 +500,15 @@ class Mini {
     Object.assign(key.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 1, far: 30 });
     key.shadow.bias = -0.0004;
     key.shadow.normalBias = 0.02;
+    this.shadowKey = key;
     s.add(key);
-    const rim = new THREE.DirectionalLight('#cfe0ff', 0.9);
+    const rim = new THREE.DirectionalLight('#ffe3cf', 0.9);
     rim.position.set(5, 3, -6);
     s.add(rim);
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), halftoneShadowMaterial(9 * this.dpr));
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    s.add(ground);
     this.scene = s;
 
     this.built = BUILDERS[kind]();
-    if (STYLE.edge) addOutlines(this.built.root, 0.011);
+    // Original geometry and motion retained; no outline hulls.
     this.pivot = new THREE.Group();
     this.pivot.add(this.built.root);
     s.add(this.pivot);
@@ -570,6 +522,15 @@ class Mini {
       this.pivot.updateMatrixWorld(true);
       this.box.union(new THREE.Box3().setFromObject(this.pivot));
     }
+
+    const dotGround = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), projectedDotShadowMaterial());
+    dotGround.rotation.x = -Math.PI / 2;
+    dotGround.position.y = -0.025;
+    dotGround.castShadow = false;
+    dotGround.receiveShadow = true;
+    s.add(dotGround);
+    this.dotShadow = dotGround;
+    dotGround.visible = true;
 
     this.st = { intro: 0, hover: 0, ex: 0 };
     this.sx = new Spring(60, 12); this.sy = new Spring(60, 12); this.sh = new Spring(110, 16); this.se = new Spring(70, 9);
@@ -648,16 +609,8 @@ class Mini {
   }
 }
 
-let shaded = false;
 export function init(els) {
   const minis = [];
-  // マテリアルは全シーン共有なので網点の陰は一度だけ仕込む（セルは画面px基準）
-  if (STYLE.shade && !shaded) {
-    shaded = true;
-    const cell = 7.5 * Math.min(devicePixelRatio || 1, 2);
-    [MAT.paper, MAT.paperIn, MAT.white, MAT.whiteIn].forEach((m) => printShade(m, INK.blue, INK.cyan, cell));
-    printShade(MAT.blue, INK.navy, INK.cyan, cell);
-  }
   for (const el of els) {
     try {
       minis.push(new Mini(el, el.dataset.scene));

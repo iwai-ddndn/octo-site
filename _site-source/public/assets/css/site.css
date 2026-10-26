@@ -4,8 +4,8 @@
 :root {
   --paper: #f7f6f2;
   --paper-2: #ecebe5;
-  --blue: #2962ff;
-  --blue-ink: #1b46d8;      /* 小さい文字用（紙地でAAコントラスト確保） */
+  --blue: #ff4d00;
+  --blue-ink: #ba3800;      /* 小さい文字用（紙地でAAコントラスト確保） */
   --white: #fff;
   --fg: var(--blue);
   --bg: var(--paper);
@@ -207,7 +207,7 @@ html.js .ht.is-fallback img { opacity: 1; }
 /* 網点の蛍光マーカー：出現時に左から刷られる */
 .statement-text .hl::before {
   content: ''; position: absolute; z-index: -1; left: -0.08em; right: -0.08em; top: 0.52em; bottom: 0.02em;
-  background: radial-gradient(circle at center, #00b4ff 0 42%, transparent 46%) 0 0 / 7px 7px;
+  background: radial-gradient(circle at center, #ffb000 0 42%, transparent 46%) 0 0 / 7px 7px;
   transform: scaleX(0); transform-origin: left; transition: transform 1.2s var(--ease) 0.5s;
 }
 .statement-text.is-in .hl::before { transform: none; }
@@ -577,3 +577,10 @@ html.is-loading .loader { display: block; }
 .unienter-screens figure { margin-bottom: clamp(32px, 4vw, 64px); }
 .unienter-screens a { display: block; cursor: zoom-in; }
 .unienter-capture-note { font-size: 12px; line-height: 1.8; margin: 0 0 clamp(56px, 7vw, 100px); }
+
+/* Approved orange palette: readable small type and dark ink on orange panels. */
+:root { --white: #211c18; }
+[data-theme='blue'] { --rule: rgba(33,28,24,.3); }
+.hd-tag,.hd-nav,.hd-contact,.hd-menu,.hero-idx,.hero-readout,.hero-jp,.hero-svc,.hero-cue,.statement-en { color: var(--blue-ink); }
+.hd[data-theme='blue'],.hd[data-theme='blue'] * { color: #211c18; }
+.hs-end,.contact,.menu { color:#211c18; }
